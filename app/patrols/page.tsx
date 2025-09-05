@@ -21,15 +21,15 @@ export default function PatrolsPage() {
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-semibold tracking-wider text-sky-300">Patrols</h1>
+				<h1 className="text-2xl font-semibold tracking-wider text-primary">Patrols</h1>
 				<Button asChild><Link href="/patrols/new">Log Patrol</Link></Button>
 			</div>
 			{patrols.length === 0 ? (
-				<div className="text-white/60">No patrols yet. Log a patrol.</div>
+				<div className="text-muted-foreground">No patrols yet. Log a patrol.</div>
 			) : (
 				<div className="overflow-x-auto">
 					<table className="w-full text-sm">
-						<thead className="text-white/60">
+						<thead className="text-muted-foreground">
 							<tr>
 								<th className="text-left py-2 pr-4">Patrol ID</th>
 								<th className="text-left py-2 pr-4">Location</th>
@@ -41,7 +41,7 @@ export default function PatrolsPage() {
 						</thead>
 						<tbody>
 							{patrols.map((p) => (
-								<tr key={p.id} className="border-t border-white/10">
+								<tr key={p.id} className="border-t border-border">
 									<td className="py-2 pr-4">{p.id}</td>
 									<td className="py-2 pr-4">{p.location}</td>
 									<td className="py-2 pr-4">{p.date}</td>

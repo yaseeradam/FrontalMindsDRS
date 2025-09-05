@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { FormCard } from "@/components/form-card";
+import { Spinner } from "@/components/ui/spinner";
 import { ArrestRecord, generateId, readStore, toBase64, writeStore } from "@/lib/storage";
 import { toast } from "sonner";
 
@@ -17,6 +19,7 @@ export default function ArrestNewPage() {
     const [assignedOfficer, setAssignedOfficer] = useState("");
     const [photoBase64, setPhotoBase64] = useState<string | undefined>();
     const [remarks, setRemarks] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     async function onSelectPhoto(file?: File) {
         if (!file) return setPhotoBase64(undefined);
@@ -24,26 +27,39 @@ export default function ArrestNewPage() {
         setPhotoBase64(b64);
     }
 
-    function submit() {
+    async function submit() {
+        if (isSubmitting) return;
+        
         if (!photoBase64) {
             toast.error("Suspect photo is required");
             return;
         }
-        const id = generateId("ARREST");
-        const next: ArrestRecord = {
-            id,
-            suspectName,
-            crime,
-            date: new Date(date).toISOString(),
-            status,
-            assignedOfficer: assignedOfficer || "Officer Adaeze Musa",
-            photoBase64,
-            synced: false,
-        };
-        const existing = readStore("arrests", [] as ArrestRecord[]);
-        writeStore("arrests", [next, ...existing]);
-        toast.success("Arrest recorded: " + id);
-        window.location.href = "/arrests";
+        
+        setIsSubmitting(true);
+        try {
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const id = generateId("ARREST");
+            const next: ArrestRecord = {
+                id,
+                suspectName,
+                crime,
+                date: new Date(date).toISOString(),
+                status,
+                assignedOfficer: assignedOfficer || "Officer Adaeze Musa",
+                photoBase64,
+                synced: false,
+            };
+            const existing = readStore("arrests", [] as ArrestRecord[]);
+            writeStore("arrests", [next, ...existing]);
+            toast.success("Arrest recorded: " + id);
+            window.location.href = "/arrests";
+        } catch (error) {
+            toast.error("Failed to record arrest");
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     return (
@@ -100,13 +116,18 @@ export default function ArrestNewPage() {
                             await onSelectPhoto(file);
                         }} />
                         {photoBase64 ? (
-                            <img src={photoBase64} alt="Preview" className="h-24 w-24 object-cover rounded-lg border border-white/10" />
+                            <Image src={photoBase64} alt="Preview" width={96} height={96} className="h-24 w-24 object-cover rounded-lg border border-border" />
                         ) : null}
                     </div>
                 </div>
                 <div className="flex gap-3 pt-2">
-                    <Button onClick={submit}>Submit</Button>
-                    <Button variant="secondary" onClick={() => window.history.back()}>Cancel</Button>
+                    <Button onClick={submit} disabled={isSubmitting} className="flex items-center gap-2">
+                        {isSubmitting && <Spinner size="sm" />}
+                        {isSubmitting ? "Recording..." : "Submit"}
+                    </Button>
+                    <Button variant="secondary" onClick={() => window.history.back()} disabled={isSubmitting}>
+                        Cancel
+                    </Button>
                 </div>
             </FormCard>
         </div>

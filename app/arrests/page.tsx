@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrestRecord, readStore, writeStore } from "@/lib/storage";
@@ -24,15 +25,15 @@ export default function ArrestsPage() {
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-semibold tracking-wider text-sky-300">Arrests</h1>
+				<h1 className="text-2xl font-semibold tracking-wider text-primary">Arrests</h1>
 				<Button asChild><Link href="/arrests/new">New Arrest</Link></Button>
 			</div>
 			{arrests.length === 0 ? (
-				<div className="text-white/60">No arrests yet. Create a new arrest.</div>
+				<div className="text-muted-foreground">No arrests yet. Create a new arrest.</div>
 			) : (
 				<div className="overflow-x-auto">
 					<table className="w-full text-sm">
-						<thead className="text-white/60">
+						<thead className="text-muted-foreground">
 							<tr>
 								<th className="text-left py-2 pr-4">Photo</th>
 								<th className="text-left py-2 pr-4">Arrest ID</th>
@@ -46,15 +47,15 @@ export default function ArrestsPage() {
 						</thead>
 						<tbody>
 							{arrests.map((a) => (
-								<tr key={a.id} className="border-t border-white/10">
+								<tr key={a.id} className="border-t border-border">
 									<td className="py-2 pr-4">
-										<img onClick={() => setPreview(a.photoBase64)} src={a.photoBase64} alt="Suspect" className="h-10 w-10 rounded object-cover cursor-zoom-in border border-white/10" />
+										<Image onClick={() => setPreview(a.photoBase64)} src={a.photoBase64} alt="Suspect" width={40} height={40} className="h-10 w-10 rounded object-cover cursor-zoom-in border border-border" />
 									</td>
 									<td className="py-2 pr-4">{a.id}</td>
 									<td className="py-2 pr-4">{a.suspectName}</td>
 									<td className="py-2 pr-4">{a.crime}</td>
 									<td className="py-2 pr-4">{new Date(a.date).toLocaleDateString()}</td>
-									<td className="py-2 pr-4"><Badge variant="secondary" className="bg-white/10">{a.status}</Badge></td>
+									<td className="py-2 pr-4"><Badge variant="secondary">{a.status}</Badge></td>
 									<td className="py-2 pr-4">{a.assignedOfficer}</td>
 									<td className="py-2 pr-4 flex gap-2">
 										<Button size="sm" variant="outline" asChild><Link href={`/arrests/edit?id=${encodeURIComponent(a.id)}`}>Edit</Link></Button>
@@ -69,7 +70,7 @@ export default function ArrestsPage() {
 
 			<Dialog open={!!preview} onOpenChange={() => setPreview(undefined)}>
 				<DialogContent className="max-w-lg">
-					{preview ? <img src={preview} alt="Preview" className="w-full rounded" /> : null}
+					{preview ? <Image src={preview} alt="Preview" width={500} height={300} className="w-full rounded" /> : null}
 				</DialogContent>
 			</Dialog>
 		</div>

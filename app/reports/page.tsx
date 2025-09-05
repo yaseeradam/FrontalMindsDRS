@@ -2,21 +2,21 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
-import { readStore } from "@/lib/storage";
+import { readStore, type CaseRecord, type ArrestRecord, type PatrolRecord } from "@/lib/storage";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 import jsPDF from "jspdf";
 
 const COLORS = ["#38bdf8","#22c55e","#a78bfa","#f59e0b","#f472b6"];
 
 export default function ReportsPage() {
-	const [cases, setCases] = useState<any[]>([]);
-	const [arrests, setArrests] = useState<any[]>([]);
-	const [patrols, setPatrols] = useState<any[]>([]);
+	const [cases, setCases] = useState<CaseRecord[]>([]);
+	const [arrests, setArrests] = useState<ArrestRecord[]>([]);
+	const [patrols, setPatrols] = useState<PatrolRecord[]>([]);
 
 	useEffect(() => {
-		setCases(readStore("cases", []));
-		setArrests(readStore("arrests", []));
-		setPatrols(readStore("patrols", []));
+		setCases(readStore<CaseRecord[]>("cases", []));
+		setArrests(readStore<ArrestRecord[]>("arrests", []));
+		setPatrols(readStore<PatrolRecord[]>("patrols", []));
 	}, []);
 
 	const crimeCounts = useMemo(() => {

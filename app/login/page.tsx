@@ -13,23 +13,23 @@ import { toast } from "sonner";
 export default function LoginPage() {
 	return (
 		<div className="min-h-[calc(100vh-4rem)] grid lg:grid-cols-2 gap-8">
-			<div className="relative rounded-2xl overflow-hidden border border-white/10 hidden lg:block">
+			<div className="relative rounded-2xl overflow-hidden border border-border hidden lg:block">
 				<Image src="/Bg.png"
 					alt="Police HQ Night"
 					fill
 					className="object-cover opacity-70"
 					priority
 				/>
-				<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-500/20 via-transparent to-transparent" />
+				<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
 			</div>
 			<div className="flex items-center justify-center">
-				<Card className="w-full max-w-md bg-white/5 backdrop-blur border-white/10">
+				<Card className="w-full max-w-md bg-card backdrop-blur border-border">
 					<CardContent className="p-6 space-y-6">
 						<div className="flex items-center gap-3">
-							<Shield className="h-8 w-8 text-sky-400" />
+							<Shield className="h-8 w-8 text-primary" />
 							<div>
-								<div className="font-bold tracking-widest text-sky-300">Braniacs DRS</div>
-								<p className="text-xs text-white/60">Secure Officer Access</p>
+								<div className="font-bold tracking-widest text-primary">Braniacs DRS</div>
+								<p className="text-xs text-muted-foreground">Secure Officer Access</p>
 							</div>
 						</div>
 						<div className="space-y-4">
@@ -57,9 +57,9 @@ export default function LoginPage() {
 								Login
 							</Button>
 							<div className="text-xs text-center">
-								<Link href="#" className="text-sky-300 hover:underline">Forgot password?</Link>
+								<Link href="#" className="text-primary hover:underline">Forgot password?</Link>
 							</div>
-							<p className="text-[10px] text-center text-white/60">Prototype demo. No real backend or storage.</p>
+							<p className="text-[10px] text-center text-muted-foreground">Prototype demo. No real backend or storage.</p>
 						</div>
 					</CardContent>
 				</Card>

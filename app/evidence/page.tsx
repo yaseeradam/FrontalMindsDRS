@@ -1,10 +1,10 @@
 "use client";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { EvidenceRecord, readStore, toBase64, writeStore, CaseRecord, ArrestRecord } from "@/lib/storage";
+import { EvidenceRecord, readStore, toBase64, writeStore, type CaseRecord, type ArrestRecord } from "@/lib/storage";
 import { toast } from "sonner";
 
 export default function EvidencePage() {
@@ -58,13 +58,13 @@ export default function EvidencePage() {
 
 	return (
 		<div className="space-y-6">
-			<h1 className="text-2xl font-semibold tracking-wider text-sky-300">Evidence</h1>
-			<Card className="bg-white/5 border-white/10">
+			<h1 className="text-2xl font-semibold tracking-wider text-primary">Evidence</h1>
+			<Card className="bg-card border-border">
 				<CardContent className="p-6 space-y-3">
 					<div className="grid md:grid-cols-4 gap-3">
 						<div>
-							<div className="text-xs text-white/60 mb-1">Owner Type</div>
-							<Select value={ownerType} onValueChange={(v) => setOwnerType(v as any)}>
+							<div className="text-xs text-muted-foreground mb-1">Owner Type</div>
+							<Select value={ownerType} onValueChange={(v) => setOwnerType(v as "case" | "arrest")}>
 								<SelectTrigger><SelectValue placeholder="Owner type" /></SelectTrigger>
 								<SelectContent>
 									<SelectItem value="case">Case</SelectItem>
@@ -73,7 +73,7 @@ export default function EvidencePage() {
 							</Select>
 						</div>
 						<div className="md:col-span-2">
-							<div className="text-xs text-white/60 mb-1">Owner</div>
+							<div className="text-xs text-muted-foreground mb-1">Owner</div>
 							<Select value={ownerId} onValueChange={setOwnerId}>
 								<SelectTrigger><SelectValue placeholder="Select case/arrest" /></SelectTrigger>
 								<SelectContent>
@@ -84,7 +84,7 @@ export default function EvidencePage() {
 							</Select>
 						</div>
 						<div>
-							<div className="text-xs text-white/60 mb-1">Files</div>
+							<div className="text-xs text-muted-foreground mb-1">Files</div>
 							<input multiple type="file" onChange={(e) => setFiles(Array.from(e.target.files || []))} />
 						</div>
 					</div>
@@ -96,18 +96,18 @@ export default function EvidencePage() {
 
 			<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
 				{evidence.map((ev) => (
-					<Card key={ev.id} className="bg-white/5 border-white/10">
+					<Card key={ev.id} className="bg-card border-border">
 						<CardContent className="p-3 space-y-2">
-							<div className="text-xs text-white/60">{ev.ownerType.toUpperCase()} • {ev.ownerId}</div>
-							<div className="rounded-lg overflow-hidden border border-white/10 h-36 bg-black/20 grid place-items-center">
+							<div className="text-xs text-muted-foreground">{ev.ownerType.toUpperCase()} • {ev.ownerId}</div>
+							<div className="rounded-lg overflow-hidden border border-border h-36 bg-muted grid place-items-center">
 								{ev.previewBase64 ? (
-									<img src={ev.previewBase64} alt={ev.filename} className="h-full w-full object-cover" />
+									<Image src={ev.previewBase64} alt={ev.filename} width={200} height={144} className="h-full w-full object-cover" />
 								) : (
-									<div className="text-xs text-white/60 px-2 text-center">{ev.filename} ({Math.round(ev.size/1024)} KB)</div>
+									<div className="text-xs text-muted-foreground px-2 text-center">{ev.filename} ({Math.round(ev.size/1024)} KB)</div>
 								)}
 							</div>
 							<div className="flex items-center justify-between text-xs">
-								<div className="text-white/70 truncate pr-2">{ev.filename}</div>
+								<div className="text-foreground truncate pr-2">{ev.filename}</div>
 								<Button size="sm" variant="destructive" onClick={() => remove(ev.id)}>Delete</Button>
 							</div>
 						</CardContent>

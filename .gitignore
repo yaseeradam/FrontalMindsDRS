@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local artifacts & app assets
+public/*.tmp
+public/*.bak
+public/*.psd
+public/*.ai
+public/*.sketch
+public/*.xcf
+public/sample-*
+*.DS_Store
+*.orig
+*.log
+
+# generated PDFs/exports
+*.pdf

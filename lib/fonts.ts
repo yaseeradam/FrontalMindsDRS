@@ -9,7 +9,7 @@ export const inter = Inter({
 export const orbitron = Orbitron({
 	subsets: ["latin"],
 	variable: "--font-orbitron",
-	weights: ["400", "600", "700", "800"] as unknown as number[],
+	weight: ["400", "600", "700", "800"],
 	display: "swap",
 });
 

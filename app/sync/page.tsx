@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { motion } from "framer-motion";
 import { markAllSynced } from "@/lib/sync";
-import { readStore } from "@/lib/storage";
+import { readStore, type CaseRecord, type ArrestRecord, type PatrolRecord } from "@/lib/storage";
 import { toast } from "sonner";
 
 export default function SyncPage() {
@@ -12,9 +13,9 @@ export default function SyncPage() {
 	const [running, setRunning] = useState(false);
 
 	const preflight = {
-		cases: readStore("cases", []).filter((r: any) => !r.synced).length,
-		arrests: readStore("arrests", []).filter((r: any) => !r.synced).length,
-		patrols: readStore("patrols", []).filter((r: any) => !r.synced).length,
+		cases: readStore("cases", [] as CaseRecord[]).filter((r) => !r.synced).length,
+		arrests: readStore("arrests", [] as ArrestRecord[]).filter((r) => !r.synced).length,
+		patrols: readStore("patrols", [] as PatrolRecord[]).filter((r) => !r.synced).length,
 	};
 
 	function runSync() {
@@ -35,15 +36,18 @@ export default function SyncPage() {
 
 	return (
 		<div className="space-y-6">
-			<h1 className="text-2xl font-semibold tracking-wider text-sky-300">Sync to HQ</h1>
-			<Card className="bg-white/5 border-white/10">
+			<h1 className="text-2xl font-semibold tracking-wider text-primary">Sync to HQ</h1>
+			<Card className="bg-card border-border">
 				<CardContent className="p-6 space-y-3">
-					<div className="text-white/70">Preflight summary</div>
+					<div className="text-muted-foreground">Preflight summary</div>
 					<div className="text-sm">Unsynced — Cases: {preflight.cases}, Arrests: {preflight.arrests}, Patrols: {preflight.patrols}</div>
-					<Button disabled={running} onClick={runSync}>Sync Now</Button>
+					<Button disabled={running} onClick={runSync} className="flex items-center gap-2">
+						{running && <Spinner size="sm" />}
+						{running ? "Syncing..." : "Sync Now"}
+					</Button>
 					{running && (
-						<div className="h-2 rounded bg-white/10 overflow-hidden">
-							<motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ ease: "easeInOut" }} className="h-full bg-sky-500" />
+						<div className="h-2 rounded bg-muted overflow-hidden">
+							<motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ ease: "easeInOut" }} className="h-full bg-primary" />
 						</div>
 					)}
 				</CardContent>

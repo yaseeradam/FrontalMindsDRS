@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { CaseRecord, readStore, writeStore } from "@/lib/storage";
@@ -57,12 +58,12 @@ export default function CaseDetailPage() {
 					</div>
 				</div>
 				<div className="space-y-4">
-					<div className="rounded-2xl border border-white/10 p-4 bg-white/5">
-						<div className="text-white/60 text-sm mb-2">Photo</div>
+					<div className="rounded-2xl border border-border p-4 bg-card">
+						<div className="text-muted-foreground text-sm mb-2">Photo</div>
 						{record.photoBase64 ? (
-							<img src={record.photoBase64} alt="Case" className="w-full rounded-lg border border-white/10" />
+							<Image src={record.photoBase64} alt="Case" width={400} height={300} className="w-full rounded-lg border border-border" />
 						) : (
-							<div className="text-white/60 text-sm">No photo attached.</div>
+							<div className="text-muted-foreground text-sm">No photo attached.</div>
 						)}
 					</div>
 				</div>

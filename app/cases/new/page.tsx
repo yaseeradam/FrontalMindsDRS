@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { FormCard } from "@/components/form-card";
+import { Spinner } from "@/components/ui/spinner";
 import { CaseRecord, generateId, readStore, toBase64, writeStore } from "@/lib/storage";
 import { toast } from "sonner";
 
@@ -17,6 +19,7 @@ export default function CaseNewPage() {
 	const [status, setStatus] = useState("Open");
 	const [description, setDescription] = useState("");
 	const [photoBase64, setPhotoBase64] = useState<string | undefined>();
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	async function onSelectPhoto(file?: File) {
 		if (!file) return setPhotoBase64(undefined);
@@ -24,24 +27,36 @@ export default function CaseNewPage() {
 		setPhotoBase64(b64);
 	}
 
-	function submit() {
-		const id = generateId("CASE");
-		const next: CaseRecord = {
-			id,
-			officer: officer || "Officer Adaeze Musa",
-			suspect: suspect || undefined,
-			crimeType,
-			date: new Date(date).toISOString(),
-			status,
-			description: description || undefined,
-			photoBase64,
-			synced: false,
-		};
-		const existing = readStore("cases", [] as CaseRecord[]);
-		const updated = [next, ...existing];
-		writeStore("cases", updated);
-		toast.success("Case created: " + id);
-		window.location.href = "/cases";
+	async function submit() {
+		if (isSubmitting) return;
+		
+		setIsSubmitting(true);
+		try {
+			// Simulate API delay
+			await new Promise(resolve => setTimeout(resolve, 1000));
+			
+			const id = generateId("CASE");
+			const next: CaseRecord = {
+				id,
+				officer: officer || "Officer Adaeze Musa",
+				suspect: suspect || undefined,
+				crimeType,
+				date: new Date(date).toISOString(),
+				status,
+				description: description || undefined,
+				photoBase64,
+				synced: false,
+			};
+			const existing = readStore("cases", [] as CaseRecord[]);
+			const updated = [next, ...existing];
+			writeStore("cases", updated);
+			toast.success("Case created: " + id);
+			window.location.href = "/cases";
+		} catch (error) {
+			toast.error("Failed to create case");
+		} finally {
+			setIsSubmitting(false);
+		}
 	}
 
 	return (
@@ -102,13 +117,18 @@ export default function CaseNewPage() {
 							}}
 						/>
 						{photoBase64 ? (
-							<img src={photoBase64} alt="Preview" className="h-24 w-24 object-cover rounded-lg border border-white/10" />
+							<Image src={photoBase64} alt="Preview" width={96} height={96} className="h-24 w-24 object-cover rounded-lg border border-border" />
 						) : null}
 					</div>
 				</div>
 				<div className="flex gap-3 pt-2">
-					<Button onClick={submit}>Submit</Button>
-					<Button variant="secondary" onClick={() => window.history.back()}>Cancel</Button>
+					<Button onClick={submit} disabled={isSubmitting} className="flex items-center gap-2">
+						{isSubmitting && <Spinner size="sm" />}
+						{isSubmitting ? "Creating..." : "Submit"}
+					</Button>
+					<Button variant="secondary" onClick={() => window.history.back()} disabled={isSubmitting}>
+						Cancel
+					</Button>
 				</div>
 			</FormCard>
 		</div>

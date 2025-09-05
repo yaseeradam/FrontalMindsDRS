@@ -2,12 +2,10 @@
 import { Tooltip } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, FileDown, RefreshCcw, FileText, FolderKanban, Gavel, Shield, CircleDot } from "lucide-react";
-import { motion } from "framer-motion";
+import { Spinner } from "@/components/ui/spinner";
+import { Plus, FileDown, RefreshCcw, FolderKanban, Gavel, Shield, CircleDot } from "lucide-react";
 import { useEffect, useState } from "react";
-import { readStore } from "@/lib/storage";
+import { readStore, type CaseRecord, type ArrestRecord, type PatrolRecord } from "@/lib/storage";
 import { ensureSeed } from "@/lib/seed";
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip as RTooltip, CartesianGrid } from "recharts";
 
@@ -18,12 +16,13 @@ export default function DashboardPage() {
 	const [counts, setCounts] = useState({ cases: 0, arrests: 0, patrols: 0, open: 0 });
     const [crimeData, setCrimeData] = useState<CrimeSlice[]>([]);
     const [arrestWeekly, setArrestWeekly] = useState<ArrestPoint[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		ensureSeed();
-		const cases = readStore("cases", [] as any[]);
-		const arrests = readStore("arrests", [] as any[]);
-		const patrols = readStore("patrols", [] as any[]);
+		const cases = readStore("cases", [] as CaseRecord[]);
+		const arrests = readStore("arrests", [] as ArrestRecord[]);
+		const patrols = readStore("patrols", [] as PatrolRecord[]);
 		setCounts({
 			cases: cases.length,
 			arrests: arrests.length,
@@ -35,6 +34,12 @@ export default function DashboardPage() {
         const byCrime: Record<string, number> = {};
         for (const c of cases) {
             byCrime[c.crimeType] = (byCrime[c.crimeType] || 0) + 1;
+        }
+        // Add sample data if no cases exist
+        if (cases.length === 0) {
+            byCrime["Burglary"] = 3;
+            byCrime["Theft"] = 2;
+            byCrime["Assault"] = 1;
         }
         setCrimeData(Object.entries(byCrime).map(([name, value]) => ({ name, value })));
 
@@ -50,7 +55,16 @@ export default function DashboardPage() {
             const found = days.find((p) => p.day === key.slice(5));
             if (found) found.count += 1;
         }
+        // Add some sample data if no arrests exist
+        if (arrests.length === 0) {
+            days.forEach((day, idx) => {
+                // Use a deterministic seed based on the day to avoid hydration mismatch
+                const seed = day.charCodeAt(0) + day.charCodeAt(1) + idx;
+                day.count = (seed % 5) + 1; // Deterministic data for demo
+            });
+        }
         setArrestWeekly(days);
+        setIsLoading(false);
 	}, []);
 
 	return (
@@ -62,10 +76,10 @@ export default function DashboardPage() {
 					{ label: "Patrols", value: counts.patrols, Icon: Shield, color: "text-fuchsia-300" },
 					{ label: "Open", value: counts.open, Icon: CircleDot, color: "text-amber-300" },
 				].map((s) => (
-					<Card key={s.label} className="bg-white/5 border-white/10">
+					<Card key={s.label} className="bg-card border-border">
 						<CardContent className="p-4 flex items-center justify-between">
 							<div>
-								<div className="text-sm text-white/60">{s.label}</div>
+								<div className="text-sm text-muted-foreground">{s.label}</div>
 								<div className="text-2xl font-bold mt-1">{s.value}</div>
 							</div>
 							<s.Icon className={`h-6 w-6 ${s.color} drop-shadow-[0_0_12px_rgba(56,189,248,0.4)]`} />
@@ -81,49 +95,91 @@ export default function DashboardPage() {
 				<Button size="sm" variant="outline"><FileDown className="h-4 w-4 mr-2" />Export PDF</Button>
 			</section>
 			<section className="grid lg:grid-cols-3 gap-6">
-				<Card className="bg-white/5 border-white/10 lg:col-span-2">
+				<Card className="bg-card border-border lg:col-span-2">
 					<CardContent className="p-4">
-						<div className="text-sm text-white/60 mb-2">Weekly arrests</div>
+						<div className="text-sm text-muted-foreground mb-2">Weekly arrests</div>
 						<div className="h-56">
-							<ResponsiveContainer width="100%" height="100%">
-								<LineChart data={arrestWeekly} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-									<CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-									<XAxis dataKey="day" stroke="#9ca3af" tick={{ fontSize: 12 }} />
-									<YAxis allowDecimals={false} stroke="#9ca3af" tick={{ fontSize: 12 }} />
-									<Tooltip contentStyle={{ background: "#0b1220", border: "1px solid rgba(255,255,255,0.1)", color: "white" }} />
-									<Line type="monotone" dataKey="count" stroke="#38bdf8" strokeWidth={2} dot={{ r: 3 }} />
-								</LineChart>
-							</ResponsiveContainer>
+							{isLoading ? (
+								<div className="flex items-center justify-center h-full text-muted-foreground gap-2">
+									<Spinner size="sm" />
+									Loading...
+								</div>
+							) : arrestWeekly.length > 0 ? (
+								<ResponsiveContainer width="100%" height="100%">
+									<LineChart data={arrestWeekly} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+										<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+										<XAxis 
+											dataKey="day" 
+											stroke="hsl(var(--muted-foreground))" 
+											tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} 
+										/>
+										<YAxis 
+											allowDecimals={false} 
+											stroke="hsl(var(--muted-foreground))" 
+											tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} 
+										/>
+										<RTooltip 
+											contentStyle={{ 
+												background: "hsl(var(--popover))", 
+												border: "1px solid hsl(var(--border))", 
+												color: "hsl(var(--popover-foreground))",
+												borderRadius: "6px"
+											}} 
+										/>
+										<Line 
+											type="monotone" 
+											dataKey="count" 
+											stroke="#3b82f6" 
+											strokeWidth={3} 
+											dot={{ r: 4, fill: "#3b82f6" }} 
+											activeDot={{ r: 6, fill: "#1d4ed8" }}
+										/>
+									</LineChart>
+								</ResponsiveContainer>
+							) : (
+								<div className="flex items-center justify-center h-full text-muted-foreground">
+									No data available
+								</div>
+							)}
 						</div>
 					</CardContent>
 				</Card>
-				<Card className="bg-white/5 border-white/10">
+				<Card className="bg-card border-border">
 					<CardContent className="p-4">
-						<div className="text-sm text-white/60 mb-2">Crime types</div>
+						<div className="text-sm text-muted-foreground mb-2">Crime types</div>
 						<div className="h-56 grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div className="h-56">
-								<ResponsiveContainer width="100%" height="100%">
-									<PieChart>
-										<Pie data={crimeData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={3}>
-											{crimeData.map((_, idx) => (
-												<Cell key={idx} fill={COLORS[idx % COLORS.length]} />
-											))}
-										</Pie>
-										<RTooltip content={<CrimeTooltip data={crimeData} />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-									</PieChart>
-								</ResponsiveContainer>
-							</div>
-							<div className="self-center">
-								<LegendList data={crimeData} />
-							</div>
+							{isLoading ? (
+								<div className="flex items-center justify-center h-full text-muted-foreground col-span-2 gap-2">
+									<Spinner size="sm" />
+									Loading...
+								</div>
+							) : (
+								<>
+									<div className="h-56">
+										<ResponsiveContainer width="100%" height="100%">
+											<PieChart>
+												<Pie data={crimeData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={3}>
+													{crimeData.map((_, idx) => (
+														<Cell key={idx} fill={COLORS[idx % COLORS.length]} />
+													))}
+												</Pie>
+												<RTooltip content={<CrimeTooltip data={crimeData} />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+											</PieChart>
+										</ResponsiveContainer>
+									</div>
+									<div className="self-center">
+										<LegendList data={crimeData} />
+									</div>
+								</>
+							)}
 						</div>
 					</CardContent>
 				</Card>
 			</section>
 			<section>
-				<Card className="bg-white/5 border-white/10">
+				<Card className="bg-card border-border">
 					<CardContent className="p-4">
-						<div className="text-sm text-white/60 mb-2">Recent activity</div>
+						<div className="text-sm text-muted-foreground mb-2">Recent activity</div>
 						<div className="space-y-4">
 							{[
 								{ t: "Case BRG-2025-001 submitted by Ofc. A. Musa", time: "2m" },
@@ -131,10 +187,10 @@ export default function DashboardPage() {
 								{ t: "Patrol log updated for Unit Viper", time: "4h" },
 							].map((a, i) => (
 								<div key={i} className="flex items-start gap-3">
-									<div className="h-2 w-2 rounded-full bg-sky-400 mt-2" />
+									<div className="h-2 w-2 rounded-full bg-primary mt-2" />
 									<div>
 										<div className="text-sm">{a.t}</div>
-										<div className="text-xs text-white/50">{a.time} ago</div>
+										<div className="text-xs text-muted-foreground">{a.time} ago</div>
 									</div>
 								</div>
 							))}
@@ -148,16 +204,16 @@ export default function DashboardPage() {
 
 const COLORS = ["#38bdf8","#22c55e","#a78bfa","#f59e0b","#f472b6"];
 
-function CrimeTooltip({ data, active, payload }: { data: CrimeSlice[]; active?: boolean; payload?: any[] }) {
+function CrimeTooltip({ data, active, payload }: { data: CrimeSlice[]; active?: boolean; payload?: Array<{ name: string; value: number; payload?: { name: string; value: number } }> }) {
     if (!active || !payload?.length) return null;
     const p = payload[0];
     const slice = data.find((d) => d.name === p.name || d.name === p.payload?.name);
     const total = data.reduce((s, d) => s + d.value, 0) || 1;
     const percent = Math.round(((slice?.value || 0) / total) * 100);
     return (
-        <div className="rounded-md border border-white/10 bg-[#0b1220]/95 px-3 py-2 text-xs">
-            <div className="font-medium">{slice?.name}</div>
-            <div className="text-white/70">{slice?.value} cases • {percent}%</div>
+        <div className="rounded-md border border-border bg-popover px-3 py-2 text-xs">
+            <div className="font-medium text-popover-foreground">{slice?.name}</div>
+            <div className="text-muted-foreground">{slice?.value} cases • {percent}%</div>
         </div>
     );
 }
@@ -171,8 +227,8 @@ function LegendList({ data }: { data: CrimeSlice[] }) {
                 return (
                     <li key={d.name} className="flex items-center gap-2">
                         <span className="h-3 w-3 rounded-sm inline-block" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                        <span className="text-white/90 w-28 truncate">{d.name}</span>
-                        <span className="text-white/60">{percent}%</span>
+                        <span className="text-foreground w-28 truncate">{d.name}</span>
+                        <span className="text-muted-foreground">{percent}%</span>
                     </li>
                 );
             })}

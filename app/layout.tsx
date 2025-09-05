@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${orbitron.variable} antialiased min-h-screen bg-gradient-to-b from-[#05070d] via-[#0b1220] to-black text-white`}>
+      <body className={`${inter.variable} ${orbitron.variable} antialiased min-h-screen bg-background text-foreground`}>
         <ThemeProvider>
           <AppShell>{children}</AppShell>
           <Toaster richColors position="top-right" />

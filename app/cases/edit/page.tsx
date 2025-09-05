@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,10 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { FormCard } from "@/components/form-card";
+import { Spinner } from "@/components/ui/spinner";
 import { CaseRecord, readStore, toBase64, writeStore } from "@/lib/storage";
 import { toast } from "sonner";
 
-export default function CaseEditPage() {
+function CaseEditForm() {
     const sp = useSearchParams();
     const id = sp.get("id") || "";
     const router = useRouter();
@@ -24,6 +26,7 @@ export default function CaseEditPage() {
     const [status, setStatus] = useState("Open");
     const [description, setDescription] = useState("");
     const [photoBase64, setPhotoBase64] = useState<string | undefined>();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const all = readStore("cases", [] as CaseRecord[]);
@@ -45,31 +48,42 @@ export default function CaseEditPage() {
         setPhotoBase64(b64);
     }
 
-    function save() {
-        if (!record) return;
-        const all = readStore("cases", [] as CaseRecord[]);
-        const updated: CaseRecord = {
-            ...record,
-            officer,
-            suspect: suspect || undefined,
-            crimeType,
-            date: new Date(date).toISOString(),
-            status,
-            description: description || undefined,
-            photoBase64,
-        };
-        const next = all.map((c) => (c.id === record.id ? updated : c));
-        writeStore("cases", next);
-        toast.success("Case updated");
-        router.push(`/cases/${encodeURIComponent(record.id)}`);
+    async function save() {
+        if (!record || isSubmitting) return;
+        
+        setIsSubmitting(true);
+        try {
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const all = readStore("cases", [] as CaseRecord[]);
+            const updated: CaseRecord = {
+                ...record,
+                officer,
+                suspect: suspect || undefined,
+                crimeType,
+                date: new Date(date).toISOString(),
+                status,
+                description: description || undefined,
+                photoBase64,
+            };
+            const next = all.map((c) => (c.id === record.id ? updated : c));
+            writeStore("cases", next);
+            toast.success("Case updated");
+            router.push(`/cases/${encodeURIComponent(record.id)}`);
+        } catch (error) {
+            toast.error("Failed to update case");
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
-    if (!id) return <div className="text-white/70">Missing case id.</div>;
-    if (!record) return <div className="text-white/70">Loading case...</div>;
+    if (!id) return <div className="text-muted-foreground">Missing case id.</div>;
+    if (!record) return <div className="text-muted-foreground">Loading case...</div>;
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-semibold tracking-wider text-sky-300">Edit Case {record.id}</h1>
+            <h1 className="text-2xl font-semibold tracking-wider text-primary">Edit Case {record.id}</h1>
             <FormCard title="Case Details" description="Update the incident record.">
                 <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -117,17 +131,28 @@ export default function CaseEditPage() {
                             await onSelectPhoto(file);
                         }} />
                         {photoBase64 ? (
-                            <img src={photoBase64} alt="Preview" className="h-24 w-24 object-cover rounded-lg border border-white/10" />
+                            <Image src={photoBase64} alt="Preview" width={96} height={96} className="h-24 w-24 object-cover rounded-lg border border-border" />
                         ) : null}
                     </div>
                 </div>
                 <div className="flex gap-3 pt-2">
-                    <Button onClick={save}>Save</Button>
-                    <Button variant="secondary" onClick={() => window.history.back()}>Cancel</Button>
+                    <Button onClick={save} disabled={isSubmitting} className="flex items-center gap-2">
+                        {isSubmitting && <Spinner size="sm" />}
+                        {isSubmitting ? "Saving..." : "Save"}
+                    </Button>
+                    <Button variant="secondary" onClick={() => window.history.back()} disabled={isSubmitting}>
+                        Cancel
+                    </Button>
                 </div>
             </FormCard>
         </div>
     );
 }
 
-
+export default function CaseEditPage() {
+    return (
+        <Suspense fallback={<div className="text-muted-foreground">Loading...</div>}>
+            <CaseEditForm />
+        </Suspense>
+    );
+}
