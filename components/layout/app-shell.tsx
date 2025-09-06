@@ -11,15 +11,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     const [collapsed, setCollapsed] = useState(false);
 	return (
 		<>
-			<Navbar />
-			<div className="mx-auto max-w-screen-2xl px-6 py-6 flex gap-6">
-				{!isLogin && (
-					<Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
-				)}
-				<main className="flex-1 min-w-0">{children}</main>
+			{!isLogin && <Navbar />}
+			{!isLogin && (
+				<Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
+			)}
+			<div className={`${!isLogin ? 'px-6 py-6' : ''} ${!isLogin ? (collapsed ? 'md:ml-16 lg:ml-16' : 'md:ml-64 lg:ml-72') : ''}`}>
+				<main className={!isLogin ? "max-w-screen-2xl mx-auto" : ""}>{children}</main>
 			</div>
 		</>
 	);
 }
-
-

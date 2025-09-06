@@ -46,79 +46,210 @@ export default function RecordsPage() {
 	}, [rows, type, status, q]);
 
 	return (
-		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-semibold tracking-wider text-primary">Records</h1>
-				<div className="flex gap-2">
-					<Button asChild><Link href="/cases/new">New Case</Link></Button>
-					<Button variant="secondary" asChild><Link href="/arrests/new">New Arrest</Link></Button>
-					<Button variant="secondary" asChild><Link href="/patrols/new">Log Patrol</Link></Button>
+		<div className="space-y-6">
+			<div className="bg-card border border-border rounded-xl p-6">
+				<div className="flex items-center justify-between">
+					<div>
+						<h1 className="text-2xl font-bold tracking-wider text-primary font-mono">RECORDS DATABASE</h1>
+						<p className="text-sm text-muted-foreground font-mono mt-1">DIGITAL EVIDENCE MANAGEMENT SYSTEM</p>
+					</div>
+					<div className="flex items-center gap-4">
+						<div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
+							<div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+							DATABASE ONLINE
+						</div>
+						<div className="flex gap-2">
+							<Button className="font-mono" asChild><Link href="/cases/new">NEW CASE</Link></Button>
+							<Button variant="outline" className="font-mono border-red-500/30 hover:bg-red-500/10" asChild><Link href="/arrests/new">ARREST</Link></Button>
+							<Button variant="outline" className="font-mono border-green-500/30 hover:bg-green-500/10" asChild><Link href="/patrols/new">PATROL</Link></Button>
+						</div>
+					</div>
 				</div>
 			</div>
-			<div className="grid md:grid-cols-4 gap-3">
-				<div>
-					<div className="text-xs text-muted-foreground mb-1">Type</div>
-					<Select value={type} onValueChange={setType}>
-						<SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
-						<SelectContent>
-							{(["All","Case","Arrest","Patrol"]).map((t) => (<SelectItem key={t} value={t}>{t}</SelectItem>))}
-						</SelectContent>
-					</Select>
+			<div className="bg-card border border-border rounded-xl p-4">
+				<div className="flex items-center justify-between mb-4">
+					<div>
+						<h3 className="font-semibold text-foreground font-mono">SEARCH FILTERS</h3>
+						<p className="text-xs text-muted-foreground font-mono">REFINE DATABASE QUERY</p>
+					</div>
+					<div className="text-xs text-muted-foreground font-mono">
+						RESULTS: {filtered.length.toString().padStart(3, '0')}
+					</div>
 				</div>
-				<div>
-					<div className="text-xs text-muted-foreground mb-1">Status</div>
-					<Select value={status} onValueChange={setStatus}>
-						<SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
-						<SelectContent>
-							{(["All","Open","Under Investigation","Transferred","Closed","In Custody","Released"]).map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
-						</SelectContent>
-					</Select>
-				</div>
-				<div className="md:col-span-2">
-					<div className="text-xs text-muted-foreground mb-1">Keyword</div>
-					<Input placeholder="Search by ID, title, officer" value={q} onChange={(e) => setQ(e.target.value)} />
+				<div className="grid md:grid-cols-4 gap-4">
+					<div>
+						<div className="text-xs text-muted-foreground mb-2 font-mono tracking-wider">RECORD TYPE</div>
+						<Select value={type} onValueChange={setType}>
+							<SelectTrigger className="font-mono"><SelectValue placeholder="All Types" /></SelectTrigger>
+							<SelectContent>
+								{(["All","Case","Arrest","Patrol"]).map((t) => (<SelectItem key={t} value={t} className="font-mono">{t}</SelectItem>))}
+							</SelectContent>
+						</Select>
+					</div>
+					<div>
+						<div className="text-xs text-muted-foreground mb-2 font-mono tracking-wider">STATUS</div>
+						<Select value={status} onValueChange={setStatus}>
+							<SelectTrigger className="font-mono"><SelectValue placeholder="All Status" /></SelectTrigger>
+							<SelectContent>
+								{(["All","Open","Under Investigation","Transferred","Closed","In Custody","Released"]).map((s) => (<SelectItem key={s} value={s} className="font-mono">{s}</SelectItem>))}
+							</SelectContent>
+						</Select>
+					</div>
+					<div className="md:col-span-2">
+						<div className="text-xs text-muted-foreground mb-2 font-mono tracking-wider">SEARCH QUERY</div>
+						<Input 
+							placeholder="Enter ID, officer name, or keywords..." 
+							value={q} 
+							onChange={(e) => setQ(e.target.value)}
+							className="font-mono"
+						/>
+					</div>
 				</div>
 			</div>
-			<div className="overflow-x-auto">
-				<table className="w-full text-sm">
-					<thead className="text-muted-foreground">
-						<tr>
-							<th className="text-left py-2 pr-4">ID</th>
-							<th className="text-left py-2 pr-4">Type</th>
-							<th className="text-left py-2 pr-4">Title</th>
-							<th className="text-left py-2 pr-4">Officer</th>
-							<th className="text-left py-2 pr-4">Date</th>
-							<th className="text-left py-2 pr-4">Status</th>
-							<th className="text-left py-2 pr-4">Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						{filtered.map((r) => (
-							<tr key={`${r.type}-${r.id}`} className="border-t border-border">
-								<td className="py-2 pr-4">{r.id}</td>
-								<td className="py-2 pr-4">
-									<Badge variant="secondary">{r.type}</Badge>
-								</td>
-								<td className="py-2 pr-4">{r.title}</td>
-								<td className="py-2 pr-4">{r.officer}</td>
-								<td className="py-2 pr-4">{new Date(r.date).toLocaleString()}</td>
-								<td className="py-2 pr-4">{r.status}</td>
-								<td className="py-2 pr-4 flex gap-2">
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+				{filtered.map((r, index) => {
+					const cardColorClass = 
+						r.type === "Case" ? "border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-950/20" :
+						r.type === "Arrest" ? "border-l-4 border-l-red-500 bg-gradient-to-r from-red-50/50 to-transparent dark:from-red-950/20" :
+						"border-l-4 border-l-green-500 bg-gradient-to-r from-green-50/50 to-transparent dark:from-green-950/20";
+					
+					const priorityLevel = 
+						r.status === "Open" || r.status === "Under Investigation" ? "HIGH" :
+						r.status === "In Custody" ? "CRITICAL" :
+						"NORMAL";
+					
+					const priorityColor = 
+						priorityLevel === "CRITICAL" ? "bg-red-500" :
+						priorityLevel === "HIGH" ? "bg-yellow-500" :
+						"bg-green-500";
+					
+					return (
+						<div 
+							key={`${r.type}-${r.id}`} 
+							className={`bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group ${cardColorClass} overflow-hidden`}
+						>
+							{/* Header */}
+							<div className="p-4 border-b border-border bg-muted/30">
+								<div className="flex items-center justify-between mb-2">
+									<div className={`font-mono text-xs px-2 py-1 rounded-md ${
+										r.type === "Case" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" :
+										r.type === "Arrest" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" :
+										"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+									}`}>
+										{r.id}
+									</div>
+									<div className="flex items-center gap-2">
+										<div className={`h-2 w-2 rounded-full ${priorityColor} animate-pulse`}></div>
+										<span className="text-xs font-mono text-muted-foreground">{priorityLevel}</span>
+									</div>
+								</div>
+								<div className="flex items-center justify-between">
+									<Badge 
+										variant={r.type === "Case" ? "default" : r.type === "Arrest" ? "destructive" : "secondary"}
+										className={`font-medium text-xs ${
+											r.type === "Case" ? "bg-blue-500 hover:bg-blue-600" :
+											r.type === "Arrest" ? "bg-red-500 hover:bg-red-600" :
+											"bg-green-500 hover:bg-green-600 text-white"
+										}`}
+									>
+										{r.type.toUpperCase()}
+									</Badge>
+									<div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
+										r.status === "Open" ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/20 dark:text-green-400 dark:border-green-700" :
+										r.status === "Under Investigation" ? "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-700" :
+										r.status === "Closed" ? "bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-700" :
+										r.status === "In Custody" ? "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700" :
+										r.status === "Released" ? "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-700" :
+										"bg-muted text-muted-foreground border-border"
+									}`}>
+										{r.status}
+									</div>
+								</div>
+							</div>
+							
+							{/* Content */}
+							<div className="p-4 space-y-3">
+								<div>
+									<div className="text-xs text-muted-foreground font-mono mb-1">INCIDENT/SUBJECT</div>
+									<div className={`font-medium text-sm group-hover:font-semibold transition-all ${
+										r.type === "Case" ? "text-blue-700 dark:text-blue-300" :
+										r.type === "Arrest" ? "text-red-700 dark:text-red-300" :
+										"text-green-700 dark:text-green-300"
+									}`}>
+										{r.title}
+									</div>
+								</div>
+								
+								<div className="grid grid-cols-2 gap-3 text-xs">
+									<div>
+										<div className="text-muted-foreground font-mono mb-1">OFFICER</div>
+										<div className="font-mono font-medium">{r.officer}</div>
+									</div>
+									<div>
+										<div className="text-muted-foreground font-mono mb-1">DATE/TIME</div>
+										<div className="font-mono">{new Date(r.date).toLocaleDateString()}</div>
+										<div className="font-mono text-xs text-muted-foreground">{new Date(r.date).toLocaleTimeString()}</div>
+									</div>
+								</div>
+								
+								{/* Classification */}
+								<div className="pt-2 border-t border-border/50">
+									<div className="flex items-center justify-between text-xs">
+										<div className="flex items-center gap-2">
+											<div className="text-muted-foreground font-mono">CLASSIFICATION:</div>
+											<div className={`px-2 py-1 rounded font-mono ${
+												r.type === "Case" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" :
+												r.type === "Arrest" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" :
+												"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+											}`}>
+												{r.type === "Case" ? "CRIMINAL" : r.type === "Arrest" ? "CUSTODY" : "PATROL"}
+											</div>
+										</div>
+										<div className="text-muted-foreground font-mono">
+											#{index.toString().padStart(3, '0')}
+										</div>
+									</div>
+								</div>
+							</div>
+							
+							{/* Actions */}
+							<div className="p-4 border-t border-border bg-muted/20">
+								<div className="flex gap-2">
 									{r.type === "Case" && (
-										<Button size="sm" variant="secondary" asChild><Link href={`/cases/${encodeURIComponent(r.id)}`}>View</Link></Button>
+										<Button size="sm" variant="outline" asChild className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-500 hover:text-white dark:border-blue-600 dark:text-blue-400 font-mono text-xs">
+											<Link href={`/cases/${encodeURIComponent(r.id)}`}>VIEW CASE</Link>
+										</Button>
 									)}
 									{r.type === "Arrest" && (
-										<Button size="sm" variant="secondary" asChild><Link href={`/arrests/edit?id=${encodeURIComponent(r.id)}`}>Edit</Link></Button>
+										<Button size="sm" variant="outline" asChild className="flex-1 border-red-300 text-red-700 hover:bg-red-500 hover:text-white dark:border-red-600 dark:text-red-400 font-mono text-xs">
+											<Link href={`/arrests/edit?id=${encodeURIComponent(r.id)}`}>EDIT RECORD</Link>
+										</Button>
 									)}
 									{r.type === "Patrol" && (
-										<Button size="sm" variant="secondary" asChild><Link href={`/patrols/new`}>New</Link></Button>
+										<Button size="sm" variant="outline" asChild className="flex-1 border-green-300 text-green-700 hover:bg-green-500 hover:text-white dark:border-green-600 dark:text-green-400 font-mono text-xs">
+											<Link href={`/patrols/new`}>NEW PATROL</Link>
+										</Button>
 									)}
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+									<Button size="sm" variant="ghost" className="px-3 text-muted-foreground hover:text-foreground font-mono text-xs">
+										PRINT
+									</Button>
+								</div>
+							</div>
+						</div>
+					);
+				})}
 			</div>
+			
+			{filtered.length === 0 && (
+				<div className="text-center py-16 bg-card border border-border rounded-xl">
+					<div className="text-lg font-medium mb-2 font-mono">NO RECORDS FOUND</div>
+					<div className="text-sm text-muted-foreground font-mono">ADJUST SEARCH PARAMETERS OR CHECK DATABASE CONNECTION</div>
+					<div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground font-mono">
+						<div className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></div>
+						SEARCH COMPLETED - 0 MATCHES
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

@@ -12,37 +12,63 @@ import { toast } from "sonner";
 
 export default function LoginPage() {
 	return (
-		<div className="min-h-[calc(100vh-4rem)] grid lg:grid-cols-2 gap-8">
-			<div className="relative rounded-2xl overflow-hidden border border-border hidden lg:block">
-				<Image src="/Bg.png"
-					alt="Police HQ Night"
+		<div className="min-h-screen relative flex items-center justify-center">
+			{/* Full-screen background image */}
+			<div className="absolute inset-0 z-0">
+				<Image 
+					src="/bg.jpg"
+					alt="Police HQ Background"
 					fill
-					className="object-cover opacity-70"
+					className="object-cover"
 					priority
+					quality={100}
 				/>
-				<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
+				{/* Multiple overlay layers for modern effect */}
+				<div className="absolute inset-0 bg-black/40" />
+				<div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background/20" />
+				<div className="absolute inset-0 backdrop-blur-[0.5px]" />
 			</div>
-			<div className="flex items-center justify-center">
-				<Card className="w-full max-w-md bg-card backdrop-blur border-border">
-					<CardContent className="p-6 space-y-6">
-						<div className="flex items-center gap-3">
-							<Shield className="h-8 w-8 text-primary" />
-							<div>
-								<div className="font-bold tracking-widest text-primary">Braniacs DRS</div>
-								<p className="text-xs text-muted-foreground">Secure Officer Access</p>
+
+			{/* Login form container */}
+			<div className="relative z-10 w-full max-w-md mx-4">
+				<Card className="bg-background/80 backdrop-blur-xl border-border/50 shadow-2xl">
+					<CardContent className="p-8 space-y-6">
+						{/* Header with logo */}
+						<div className="text-center space-y-2">
+							<div className="flex justify-center mb-4">
+								<div className="p-3 rounded-full bg-primary/10 border border-primary/20">
+									<Shield className="h-8 w-8 text-primary drop-shadow-[0_0_12px_rgba(56,189,248,0.5)]" />
+								</div>
 							</div>
+							<h1 className="text-2xl font-bold tracking-wider text-foreground font-mono">BRANIACS DRS</h1>
+							<p className="text-sm text-muted-foreground font-mono">SECURE OFFICER ACCESS PORTAL</p>
+							<div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 						</div>
+
+						{/* Login form */}
 						<div className="space-y-4">
 							<div className="space-y-2">
-								<Label htmlFor="officerId">Officer ID</Label>
-								<Input id="officerId" placeholder="e.g. OFC-01983" required />
+								<Label htmlFor="officerId" className="font-mono text-xs tracking-wider uppercase">Officer ID</Label>
+								<Input 
+									id="officerId" 
+									placeholder="e.g. OFC-01983" 
+									required 
+									className="font-mono bg-background/50 border-border/50 focus:border-primary/50 backdrop-blur"
+								/>
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="password">Password</Label>
-								<Input id="password" type="password" required />
+								<Label htmlFor="password" className="font-mono text-xs tracking-wider uppercase">Security Code</Label>
+								<Input 
+									id="password" 
+									type="password" 
+									placeholder="••••••••" 
+									required 
+									className="font-mono bg-background/50 border-border/50 focus:border-primary/50 backdrop-blur"
+								/>
 							</div>
+							
 							<Button
-								className="w-full"
+								className="w-full font-mono tracking-wider bg-primary hover:bg-primary/90 shadow-lg hover:shadow-primary/25 transition-all duration-300"
 								onClick={() => {
 									const officer = {
 										id: "OFC-01983",
@@ -54,15 +80,39 @@ export default function LoginPage() {
 									window.location.href = "/dashboard";
 								}}
 							>
-								Login
+								ACCESS SYSTEM
 							</Button>
-							<div className="text-xs text-center">
-								<Link href="#" className="text-primary hover:underline">Forgot password?</Link>
+							
+							<div className="text-center">
+								<Link 
+									href="#" 
+									className="text-xs text-muted-foreground hover:text-primary font-mono transition-colors"
+								>
+									FORGOT CREDENTIALS?
+								</Link>
 							</div>
-							<p className="text-[10px] text-center text-muted-foreground">Prototype demo. No real backend or storage.</p>
+						</div>
+
+						{/* Footer */}
+						<div className="text-center space-y-2">
+							<div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
+							<div className="flex items-center justify-center gap-2 text-xs text-muted-foreground font-mono">
+								<div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+								SYSTEM ONLINE
+							</div>
+							<p className="text-[10px] text-muted-foreground font-mono opacity-60">
+								PROTOTYPE DEMONSTRATION • NO REAL AUTHENTICATION
+							</p>
 						</div>
 					</CardContent>
 				</Card>
+			</div>
+
+			{/* Floating particles effect (optional) */}
+			<div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+				<div className="absolute top-1/4 left-1/4 h-2 w-2 bg-primary/20 rounded-full animate-ping" style={{animationDelay: '0s'}} />
+				<div className="absolute top-3/4 right-1/4 h-1 w-1 bg-primary/30 rounded-full animate-ping" style={{animationDelay: '2s'}} />
+				<div className="absolute top-1/2 right-1/3 h-1.5 w-1.5 bg-primary/25 rounded-full animate-ping" style={{animationDelay: '4s'}} />
 			</div>
 		</div>
 	);
