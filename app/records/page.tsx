@@ -7,6 +7,9 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import Link from "next/link";
 import { ensureSeed } from "@/lib/seed";
 import { readStore, type CaseRecord, type ArrestRecord, type PatrolRecord } from "@/lib/storage";
+import { Printer, BookOpen } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 type Row = {
 	id: string;
@@ -15,6 +18,40 @@ type Row = {
 	officer: string;
 	date: string;
 	status?: string;
+};
+
+// Nigerian Legal Codes Data
+const nigerianLegalCodes = {
+	"Criminal Code": {
+		code: "CC",
+		description: "Criminal Code Act (Laws of the Federation of Nigeria 2004)",
+		sections: [
+			{ section: "Section 316", title: "Theft", description: "Any person who steals anything capable of being stolen is guilty of a felony" },
+			{ section: "Section 319", title: "Burglary", description: "Breaking into building with intent to commit felony" },
+			{ section: "Section 320", title: "Robbery", description: "Stealing with violence or threat of violence" },
+			{ section: "Section 351", title: "Assault", description: "Common assault punishable by imprisonment" },
+			{ section: "Section 55", title: "Murder", description: "Unlawful killing of human being with malice aforethought" },
+			{ section: "Section 221", title: "Rape", description: "Unlawful carnal knowledge without consent" }
+		]
+	},
+	"Penal Code": {
+		code: "PC",
+		description: "Penal Code Act (Applicable in Northern Nigeria)",
+		sections: [
+			{ section: "Section 286", title: "Theft", description: "Dishonestly taking moveable property" },
+			{ section: "Section 289", title: "House Breaking", description: "Breaking into building to commit offense" },
+			{ section: "Section 298", title: "Robbery", description: "Theft with violence or intimidation" },
+			{ section: "Section 240", title: "Hurt", description: "Voluntarily causing hurt to another" }
+		]
+	},
+	"EFCC Act": {
+		code: "EFCC",
+		description: "Economic and Financial Crimes Commission Act 2004",
+		sections: [
+			{ section: "Section 15", title: "Money Laundering", description: "Prohibition of money laundering activities" },
+			{ section: "Section 1", title: "Advance Fee Fraud", description: "Fraudulent schemes involving advance payments" }
+		]
+	}
 };
 
 export default function RecordsPage() {
@@ -45,18 +82,68 @@ export default function RecordsPage() {
 		});
 	}, [rows, type, status, q]);
 
+	// Print function for individual records
+	const printRecord = (record: Row) => {
+		const printWindow = window.open('', '_blank');
+		if (!printWindow) return;
+		
+		const printHTML = `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<title>${record.type} Report - ${record.id}</title>
+				<style>
+					body { font-family: 'Courier New', monospace; margin: 40px; line-height: 1.6; }
+					.header { border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
+					.title { font-size: 24px; font-weight: bold; color: #3b82f6; }
+					.record-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+					.info-item { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+					.info-label { font-weight: bold; color: #555; font-size: 12px; text-transform: uppercase; margin-bottom: 5px; }
+					@media print { body { margin: 0; } @page { margin: 2cm; } }
+				</style>
+			</head>
+			<body>
+				<div class="header">
+					<h1 class="title">NIGERIA POLICE FORCE - ${record.type.toUpperCase()} REPORT</h1>
+					<p>Digital Records System</p>
+				</div>
+				<div class="record-info">
+					<div class="info-item"><div class="info-label">${record.type} ID</div><div>${record.id}</div></div>
+					<div class="info-item"><div class="info-label">Status</div><div>${record.status || 'N/A'}</div></div>
+					<div class="info-item"><div class="info-label">Officer</div><div>${record.officer}</div></div>
+					<div class="info-item"><div class="info-label">${record.type === 'Case' ? 'Crime Type' : 'Subject'}</div><div>${record.title}</div></div>
+					<div class="info-item"><div class="info-label">Date & Time</div><div>${new Date(record.date).toLocaleString()}</div></div>
+					<div class="info-item"><div class="info-label">Classification</div><div>${record.type === 'Case' ? 'CRIMINAL' : record.type === 'Arrest' ? 'CUSTODY' : 'PATROL'}</div></div>
+				</div>
+				<div style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px; font-size: 10px; color: #666; text-align: center;">
+					<p>Generated on ${new Date().toLocaleString()} | Nigeria Police Force DRS</p>
+					<p>This document contains confidential information and is for official use only.</p>
+				</div>
+			</body>
+			</html>
+		`;
+		
+		printWindow.document.open();
+		printWindow.document.write(printHTML);
+		printWindow.document.close();
+		
+		setTimeout(() => {
+			printWindow.print();
+		}, 500);
+	};
+
 	return (
 		<div className="space-y-6">
 			<div className="bg-card border border-border rounded-xl p-6">
 				<div className="flex items-center justify-between">
 					<div>
-						<h1 className="text-2xl font-bold tracking-wider text-primary font-mono">RECORDS DATABASE</h1>
-						<p className="text-sm text-muted-foreground font-mono mt-1">DIGITAL EVIDENCE MANAGEMENT SYSTEM</p>
+						<h1 className="text-2xl font-bold tracking-wider text-primary font-mono">NIGERIAN LAW ACTS DATABASE</h1>
+						<p className="text-sm text-muted-foreground font-mono mt-1">LEGAL REFERENCES & CASE RECORDS</p>
 					</div>
 					<div className="flex items-center gap-4">
 						<div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
 							<div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-							DATABASE ONLINE
+							LAW ACTS ONLINE
 						</div>
 						<div className="flex gap-2">
 							<Button className="font-mono" asChild><Link href="/cases/new">NEW CASE</Link></Button>
@@ -230,7 +317,13 @@ export default function RecordsPage() {
 											<Link href={`/patrols/new`}>NEW PATROL</Link>
 										</Button>
 									)}
-									<Button size="sm" variant="ghost" className="px-3 text-muted-foreground hover:text-foreground font-mono text-xs">
+									<Button 
+										size="sm" 
+										variant="outline" 
+										onClick={() => printRecord(r)}
+										className="px-3 font-mono text-xs border-gray-300 hover:bg-gray-100"
+									>
+										<Printer className="h-3 w-3 mr-1" />
 										PRINT
 									</Button>
 								</div>
@@ -250,6 +343,52 @@ export default function RecordsPage() {
 					</div>
 				</div>
 			)}
+			
+			<Separator className="my-8" />
+			
+			{/* Nigerian Legal Codes Section */}
+			<div className="space-y-6">
+				<div className="flex items-center gap-3">
+					<BookOpen className="h-6 w-6 text-primary" />
+					<h2 className="text-xl font-bold font-mono text-primary">NIGERIAN LEGAL CODES REFERENCE</h2>
+				</div>
+				
+				<div className="grid gap-6 lg:grid-cols-2">
+					{Object.entries(nigerianLegalCodes).map(([codeName, codeData]) => (
+						<Card key={codeName} className="bg-card border-border">
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2 font-mono">
+									<BookOpen className="h-5 w-5 text-blue-500" />
+									{codeName}
+									<Badge variant="secondary" className="font-mono text-xs">
+										{codeData.code}
+									</Badge>
+								</CardTitle>
+								<p className="text-sm text-muted-foreground font-mono">
+									{codeData.description}
+								</p>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-3">
+									{codeData.sections.map((section, idx) => (
+										<div key={idx} className="p-3 rounded-lg bg-muted/30 border border-border/50">
+											<div className="flex items-center justify-between mb-2">
+												<Badge variant="outline" className="font-mono text-xs">
+													{section.section}
+												</Badge>
+												<span className="font-semibold text-sm">{section.title}</span>
+											</div>
+											<p className="text-xs text-muted-foreground font-mono">
+												{section.description}
+											</p>
+										</div>
+									))}
+								</div>
+							</CardContent>
+						</Card>
+					))}
+				</div>
+			</div>
 		</div>
 	);
 }

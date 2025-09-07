@@ -9,6 +9,7 @@ import { ArrestRecord, readStore, writeStore } from "@/lib/storage";
 import { ensureSeed } from "@/lib/seed";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Printer, Eye } from "lucide-react";
 
 export default function ArrestsPage() {
 	const [arrests, setArrests] = useState<ArrestRecord[]>([]);
@@ -34,6 +35,64 @@ export default function ArrestsPage() {
 		setArrests(next);
 		writeStore("arrests", next);
 	}
+
+	// Print function for arrest records
+	const printArrest = (arrest: ArrestRecord) => {
+		const printWindow = window.open('', '_blank');
+		if (!printWindow) return;
+		
+		const printHTML = `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<title>Arrest Report - ${arrest.id}</title>
+				<style>
+					body { font-family: 'Courier New', monospace; margin: 40px; line-height: 1.6; }
+					.header { border-bottom: 3px solid #ef4444; padding-bottom: 20px; margin-bottom: 30px; }
+					.title { font-size: 24px; font-weight: bold; color: #ef4444; }
+					.arrest-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+					.info-item { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+					.info-label { font-weight: bold; color: #555; font-size: 12px; text-transform: uppercase; margin-bottom: 5px; }
+					.photo-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
+					.suspect-photo { max-width: 150px; max-height: 200px; border: 2px solid #ef4444; border-radius: 4px; }
+					@media print { body { margin: 0; } @page { margin: 2cm; } }
+				</style>
+			</head>
+			<body>
+				<div class="header">
+					<h1 class="title">NIGERIA POLICE FORCE - ARREST REPORT</h1>
+					<p>Digital Records System | Custody Management</p>
+				</div>
+				<div class="arrest-info">
+					<div class="info-item"><div class="info-label">Arrest ID</div><div>${arrest.id}</div></div>
+					<div class="info-item"><div class="info-label">Status</div><div>${arrest.status}</div></div>
+					<div class="info-item"><div class="info-label">Suspect Name</div><div>${arrest.suspectName}</div></div>
+					<div class="info-item"><div class="info-label">Crime</div><div>${arrest.crime}</div></div>
+					<div class="info-item"><div class="info-label">Assigned Officer</div><div>${arrest.assignedOfficer}</div></div>
+					<div class="info-item"><div class="info-label">Date & Time</div><div>${new Date(arrest.date).toLocaleString()}</div></div>
+					<div class="info-item"><div class="info-label">Arrest Record</div><div>NPF Digital System</div></div>
+					<div class="info-item"><div class="info-label">Classification</div><div>CUSTODY</div></div>
+				</div>
+				<div class="photo-section">
+					<div class="info-label">Suspect Photo</div>
+					<img src="${arrest.photoBase64}" alt="Suspect Photo" class="suspect-photo" />
+				</div>
+				<div style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px; font-size: 10px; color: #666; text-align: center;">
+					<p>Generated on ${new Date().toLocaleString()} | Nigeria Police Force DRS</p>
+					<p>This document contains confidential information and is for official use only.</p>
+				</div>
+			</body>
+			</html>
+		`;
+		
+		printWindow.document.open();
+		printWindow.document.write(printHTML);
+		printWindow.document.close();
+		
+		setTimeout(() => {
+			printWindow.print();
+		}, 500);
+	};
 
 	return (
 		<div className="space-y-6">
@@ -195,10 +254,22 @@ export default function ArrestsPage() {
 								<div className="p-4 border-t border-border bg-muted/20">
 									<div className="flex gap-2">
 										<Button size="sm" variant="outline" asChild className="flex-1 border-red-300 text-red-700 hover:bg-red-500 hover:text-white dark:border-red-600 dark:text-red-400 font-mono text-xs">
-											<Link href={`/arrests/edit?id=${encodeURIComponent(a.id)}`}>EDIT RECORD</Link>
+											<Link href={`/arrests/edit?id=${encodeURIComponent(a.id)}`} className="flex items-center gap-1">
+												<Eye className="h-3 w-3" />
+												VIEW
+											</Link>
+										</Button>
+										<Button 
+											size="sm" 
+											variant="outline" 
+											onClick={() => printArrest(a)}
+											className="border-gray-300 text-gray-700 hover:bg-gray-100 font-mono text-xs px-3"
+										>
+											<Printer className="h-3 w-3 mr-1" />
+											PRINT
 										</Button>
 										<Button size="sm" variant="destructive" onClick={() => remove(a.id)} className="px-3 font-mono text-xs">
-											DELETE
+											DEL
 										</Button>
 									</div>
 								</div>

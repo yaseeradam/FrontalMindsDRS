@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { CaseRecord, readStore, writeStore } from "@/lib/storage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
 import Link from "next/link";
 
 export default function CaseDetailPage() {
@@ -26,6 +27,147 @@ export default function CaseDetailPage() {
 		router.push("/cases");
 	}
 
+	function printCase() {
+		if (!record) return;
+		
+		// Create a print-friendly version of the case
+		const printWindow = window.open('', '_blank');
+		if (!printWindow) return;
+		
+		const printHTML = `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<title>Case Report - ${record.id}</title>
+				<style>
+					body {
+						font-family: 'Courier New', monospace;
+						margin: 40px;
+						line-height: 1.6;
+						color: #000;
+					}
+					.header {
+						border-bottom: 3px solid #3b82f6;
+						padding-bottom: 20px;
+						margin-bottom: 30px;
+					}
+					.title {
+						font-size: 24px;
+						font-weight: bold;
+						color: #3b82f6;
+						margin: 0;
+					}
+					.subtitle {
+						font-size: 12px;
+						color: #666;
+						margin: 5px 0 0 0;
+					}
+					.case-info {
+						display: grid;
+						grid-template-columns: 1fr 1fr;
+						gap: 20px;
+						margin-bottom: 30px;
+					}
+					.info-item {
+						padding: 10px;
+						border: 1px solid #ddd;
+						border-radius: 4px;
+					}
+					.info-label {
+						font-weight: bold;
+						color: #555;
+						font-size: 12px;
+						text-transform: uppercase;
+						margin-bottom: 5px;
+					}
+					.info-value {
+						font-size: 14px;
+					}
+					.description {
+						margin-top: 30px;
+						padding: 20px;
+						border: 1px solid #ddd;
+						border-radius: 4px;
+						background: #f9f9f9;
+					}
+					.status-badge {
+						padding: 4px 8px;
+						background: #3b82f6;
+						color: white;
+						border-radius: 4px;
+						font-size: 12px;
+						font-weight: bold;
+					}
+					.footer {
+						margin-top: 40px;
+						border-top: 1px solid #ddd;
+						padding-top: 20px;
+						font-size: 10px;
+						color: #666;
+						text-align: center;
+					}
+					@media print {
+						body { margin: 0; }
+						@page { margin: 2cm; }
+					}
+				</style>
+			</head>
+			<body>
+				<div class="header">
+					<h1 class="title">BRANIACS POLICE DRS</h1>
+					<p class="subtitle">Digital Records System - Case Report</p>
+				</div>
+				
+				<div class="case-info">
+					<div class="info-item">
+						<div class="info-label">Case ID</div>
+						<div class="info-value">${record.id}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Status</div>
+						<div class="info-value"><span class="status-badge">${record.status}</span></div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Officer</div>
+						<div class="info-value">${record.officer}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Crime Type</div>
+						<div class="info-value">${record.crimeType}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Suspect</div>
+						<div class="info-value">${record.suspect || '—'}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Date & Time</div>
+						<div class="info-value">${new Date(record.date).toLocaleString()}</div>
+					</div>
+				</div>
+				
+				<div class="description">
+					<div class="info-label">Case Description</div>
+					<div class="info-value">${record.description || 'No description provided.'}</div>
+				</div>
+				
+				<div class="footer">
+					<p>Generated on ${new Date().toLocaleString()} | Braniacs Police DRS</p>
+					<p>This document contains confidential information and is for official use only.</p>
+				</div>
+			</body>
+			</html>
+		`;
+		
+		printWindow.document.open();
+		printWindow.document.write(printHTML);
+		printWindow.document.close();
+		
+		// Auto-print after a short delay to allow content to load
+		setTimeout(() => {
+			printWindow.print();
+		}, 500);
+	}
+
 	if (!record) {
 		return <div className="text-white/70">Case not found.</div>;
 	}
@@ -35,6 +177,10 @@ export default function CaseDetailPage() {
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-semibold tracking-wider text-sky-300">{record.id}</h1>
 				<div className="flex gap-2">
+					<Button variant="outline" onClick={printCase} className="font-mono">
+						<Printer className="h-4 w-4 mr-2" />
+						PRINT CASE
+					</Button>
 					<Button variant="secondary" asChild><Link href={`/cases/edit?id=${encodeURIComponent(record.id)}`}>Edit</Link></Button>
 					<Button variant="outline">Transfer Case</Button>
 					<Button variant="destructive" onClick={remove}>Delete</Button>

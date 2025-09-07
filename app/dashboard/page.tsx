@@ -151,16 +151,20 @@ export default function DashboardPage() {
 								<ResponsiveContainer width="100%" height="100%">
 									<LineChart data={arrestWeekly} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
 										<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-										<XAxis 
-											dataKey="day" 
-											stroke="hsl(var(--foreground))" 
-											tick={{ fontSize: 12, fill: "hsl(var(--foreground))" }} 
-										/>
-										<YAxis 
-											allowDecimals={false} 
-											stroke="hsl(var(--foreground))" 
-											tick={{ fontSize: 12, fill: "hsl(var(--foreground))" }} 
-										/>
+									<XAxis 
+										dataKey="day" 
+										stroke="#ffffff" 
+										tick={{ fontSize: 12, fill: "#ffffff" }} 
+										axisLine={{ stroke: "#ffffff" }}
+										tickLine={{ stroke: "#ffffff" }}
+									/>
+									<YAxis 
+										allowDecimals={false} 
+										stroke="#ffffff" 
+										tick={{ fontSize: 12, fill: "#ffffff" }} 
+										axisLine={{ stroke: "#ffffff" }}
+										tickLine={{ stroke: "#ffffff" }}
+									/>
 										<RTooltip 
 											contentStyle={{ 
 												background: "hsl(var(--popover))", 

@@ -17,12 +17,12 @@ import {
 } from "lucide-react";
 
 const items = [
-	{ href: "/dashboard", label: "COMMAND CENTER", icon: LayoutGrid, description: "Main Dashboard" },
-	{ href: "/records", label: "DATABASE", icon: Search, description: "Search Records" },
 	{ href: "/cases", label: "CASE FILES", icon: FolderKanban, description: "Active Cases" },
 	{ href: "/arrests", label: "ARRESTS", icon: Gavel, description: "Booking Records" },
 	{ href: "/patrols", label: "PATROL LOGS", icon: ShieldHalf, description: "Field Reports" },
 	{ href: "/evidence", label: "EVIDENCE", icon: Boxes, description: "Digital Vault" },
+	{ href: "/dashboard", label: "COMMAND CENTER", icon: LayoutGrid, description: "Main Dashboard" },
+	{ href: "/records", label: "LAW ACTS", icon: Search, description: "Legal References" },
 	{ href: "/sync", label: "HQ SYNC", icon: RefreshCcw, description: "Data Transfer" },
 	{ href: "/reports", label: "ANALYTICS", icon: BarChart3, description: "Statistics" },
 	{ href: "/settings", label: "SYSTEM", icon: Settings, description: "Configuration" },

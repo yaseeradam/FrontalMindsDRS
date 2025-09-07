@@ -85,54 +85,84 @@ function CaseEditForm() {
         <div className="space-y-6">
             <h1 className="text-2xl font-semibold tracking-wider text-primary">Edit Case {record.id}</h1>
             <FormCard title="Case Details" description="Update the incident record.">
-                <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="officer">Reporting Officer *</Label>
-                        <Input id="officer" value={officer} onChange={(e) => setOfficer(e.target.value)} required />
+                <div className="grid md:grid-cols-12 gap-6">
+                    {/* Photo Upload Section - Left Side */}
+                    <div className="md:col-span-3 space-y-3">
+                        <Label className="text-sm font-medium">Photo Evidence</Label>
+                        <div className="space-y-3">
+                            <div className="relative">
+                                {photoBase64 ? (
+                                    <div className="relative group">
+                                        <Image 
+                                            src={photoBase64} 
+                                            alt="Case Photo" 
+                                            width={200} 
+                                            height={200} 
+                                            className="w-full aspect-square object-cover rounded-lg border-2 border-border shadow-sm"
+                                        />
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all rounded-lg" />
+                                    </div>
+                                ) : (
+                                    <div className="w-full aspect-square bg-muted rounded-lg border-2 border-dashed border-border flex items-center justify-center">
+                                        <div className="text-center text-muted-foreground">
+                                            <div className="text-2xl mb-2">📷</div>
+                                            <div className="text-sm">No Photo</div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    await onSelectPhoto(file);
+                                }} 
+                                className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                            />
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="suspect">Suspect (optional)</Label>
-                        <Input id="suspect" value={suspect} onChange={(e) => setSuspect(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Crime Type *</Label>
-                        <Select value={crimeType} onValueChange={setCrimeType}>
-                            <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
-                            <SelectContent>
-                                {["Burglary","Theft","Assault","Traffic","Cybercrime","Other"].map((t) => (
-                                    <SelectItem key={t} value={t}>{t}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="date">Date & Time *</Label>
-                        <Input id="date" type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} required />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Status *</Label>
-                        <Select value={status} onValueChange={setStatus}>
-                            <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
-                            <SelectContent>
-                                {["Open","Under Investigation","Transferred","Closed"].map((s) => (
-                                    <SelectItem key={s} value={s}>{s}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="md:col-span-2 space-y-2">
-                        <Label htmlFor="desc">Description</Label>
-                        <Textarea id="desc" rows={5} value={description} onChange={(e) => setDescription(e.target.value)} />
-                    </div>
-                    <div className="md:col-span-2 space-y-2">
-                        <Label>Photo</Label>
-                        <input type="file" accept="image/*" onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            await onSelectPhoto(file);
-                        }} />
-                        {photoBase64 ? (
-                            <Image src={photoBase64} alt="Preview" width={96} height={96} className="h-24 w-24 object-cover rounded-lg border border-border" />
-                        ) : null}
+                    
+                    {/* Form Fields - Right Side */}
+                    <div className="md:col-span-9 grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="officer">Reporting Officer *</Label>
+                            <Input id="officer" value={officer} onChange={(e) => setOfficer(e.target.value)} required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="suspect">Suspect (optional)</Label>
+                            <Input id="suspect" value={suspect} onChange={(e) => setSuspect(e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Crime Type *</Label>
+                            <Select value={crimeType} onValueChange={setCrimeType}>
+                                <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                                <SelectContent>
+                                    {["Burglary","Theft","Assault","Traffic","Cybercrime","Other"].map((t) => (
+                                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="date">Date & Time *</Label>
+                            <Input id="date" type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Status *</Label>
+                            <Select value={status} onValueChange={setStatus}>
+                                <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+                                <SelectContent>
+                                    {["Open","Under Investigation","Transferred","Closed"].map((s) => (
+                                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="md:col-span-2 space-y-2">
+                            <Label htmlFor="desc">Description</Label>
+                            <Textarea id="desc" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
+                        </div>
                     </div>
                 </div>
                 <div className="flex gap-3 pt-2">

@@ -10,6 +10,13 @@ const suspectNames = [
 	"Blessing Okwu", "Musa Ibrahim", "Adunni Fagbemi", "Chukwuma Okoye", "Amina Hassan"
 ];
 
+// Function to get random face image from 0001-0028
+function getRandomFaceImage(): string {
+	const randomNum = Math.floor(Math.random() * 28) + 1;
+	const paddedNum = String(randomNum).padStart(4, '0');
+	return `/${paddedNum}.jpg`;
+}
+
 const locations = [
 	"Victoria Island", "Ikoyi", "Lekki Phase 1", "Ikeja GRA", "Yaba", "Surulere", "Apapa",
 	"Ilupeju", "Ojodu", "Maryland", "Gbagada", "Ketu", "Mile 2", "Festac Town", "Ajah",
@@ -55,10 +62,11 @@ const patrolNotes = [
 ];
 
 export function ensureSeed() {
-	// Force regenerate with new realistic data (remove this condition to always regenerate)
+	// Force regenerate with new face images - always regenerate
 	// Cases - Generate 15 realistic cases
 	const cases = readStore<CaseRecord[]>("cases", []);
-	if (!cases || cases.length < 15) {
+	// Force regenerate to use new face images
+	if (true) { // Always regenerate for now
 		const seeded: CaseRecord[] = Array.from({ length: 15 }).map((_, i) => ({
 			id: generateId("CASE"),
 			officer: officers[i % officers.length],
@@ -67,7 +75,7 @@ export function ensureSeed() {
 			date: new Date(Date.now() - (i * 86400000) - Math.random() * 86400000).toISOString(),
 			status: ["Open", "Under Investigation", "Under Investigation", "Closed", "Pending Review"][i % 5],
 			description: caseDescriptions[i % caseDescriptions.length],
-			photoBase64: i % 3 === 0 ? "/BG.png" : undefined, // Use BG.png for some cases
+			photoBase64: i % 3 === 0 ? getRandomFaceImage() : undefined, // Use random face for some cases
 			synced: Math.random() > 0.7, // Some cases are synced
 		}));
 		writeStore("cases", seeded);
@@ -75,7 +83,8 @@ export function ensureSeed() {
 
 	// Arrests - Generate 12 realistic arrests
 	const arrests = readStore<ArrestRecord[]>("arrests", []);
-	if (!arrests || arrests.length < 12) {
+	// Force regenerate to use new face images
+	if (true) { // Always regenerate for now
 		const seeded: ArrestRecord[] = Array.from({ length: 12 }).map((_, i) => ({
 			id: generateId("ARREST"),
 			suspectName: suspectNames[i % suspectNames.length],
@@ -83,7 +92,7 @@ export function ensureSeed() {
 			date: new Date(Date.now() - (i * 43200000) - Math.random() * 43200000).toISOString(),
 			status: ["In Custody", "In Custody", "Released", "Transferred", "Bailed"][i % 5],
 			assignedOfficer: officers[i % officers.length],
-			photoBase64: "/BG.png", // Use BG.png as suspect photo for all arrests
+			photoBase64: getRandomFaceImage(), // Use random face as suspect photo for all arrests
 			synced: Math.random() > 0.6,
 		}));
 		writeStore("arrests", seeded);
@@ -91,7 +100,8 @@ export function ensureSeed() {
 
 	// Patrols - Generate 18 patrol logs
 	const patrols = readStore<PatrolRecord[]>("patrols", []);
-	if (!patrols || patrols.length < 18) {
+	// Force regenerate
+	if (true) { // Always regenerate for now
 		const seeded: PatrolRecord[] = Array.from({ length: 18 }).map((_, i) => {
 			const date = new Date(Date.now() - (i * 21600000) - Math.random() * 21600000);
 			return {
@@ -112,13 +122,20 @@ export function ensureSeed() {
 export function resetAndRegenerateData() {
 	// Clear existing data
 	if (typeof window !== 'undefined') {
-		localStorage.removeItem('braniacs-drs-cases');
-		localStorage.removeItem('braniacs-drs-arrests');
-		localStorage.removeItem('braniacs-drs-patrols');
+		localStorage.removeItem('cases');
+		localStorage.removeItem('arrests');
+		localStorage.removeItem('patrols');
+		localStorage.removeItem('evidence');
+		localStorage.removeItem('transfers');
 	}
 	
 	// Force regeneration
 	ensureSeed();
+}
+
+// Force clear and regenerate data immediately
+export function forceRegenerateWithNewImages() {
+	resetAndRegenerateData();
 }
 
 
