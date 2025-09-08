@@ -47,39 +47,133 @@ export default function ArrestsPage() {
 			<head>
 				<title>Arrest Report - ${arrest.id}</title>
 				<style>
-					body { font-family: 'Courier New', monospace; margin: 40px; line-height: 1.6; }
-					.header { border-bottom: 3px solid #ef4444; padding-bottom: 20px; margin-bottom: 30px; }
-					.title { font-size: 24px; font-weight: bold; color: #ef4444; }
-					.arrest-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-					.info-item { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-					.info-label { font-weight: bold; color: #555; font-size: 12px; text-transform: uppercase; margin-bottom: 5px; }
-					.photo-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
-					.suspect-photo { max-width: 150px; max-height: 200px; border: 2px solid #ef4444; border-radius: 4px; }
-					@media print { body { margin: 0; } @page { margin: 2cm; } }
+					body { font-family: 'Arial', sans-serif; margin: 20px; line-height: 1.4; color: #333; }
+					.letterhead { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 30px 40px; margin: -20px -20px 30px -20px; position: relative; }
+					.letterhead::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #ef4444, #dc2626); }
+					.agency-logo { width: 60px; height: 60px; background: #ef4444; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; float: left; margin-right: 20px; }
+					.agency-details { overflow: hidden; }
+					.agency-name { font-size: 28px; font-weight: bold; margin: 0 0 5px 0; color: #ef4444; }
+					.agency-subtitle { font-size: 16px; margin: 0 0 8px 0; color: #cbd5e1; }
+					.report-type { font-size: 14px; font-weight: bold; color: #fbbf24; margin: 0; }
+					.report-meta { position: absolute; top: 30px; right: 40px; text-align: right; font-size: 11px; color: #94a3b8; }
+					.arrest-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+					.info-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
+					.info-label { font-weight: bold; color: #475569; font-size: 11px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+					.info-value { color: #1e293b; font-size: 14px; font-weight: 500; }
+					.photo-section { margin: 30px 0; padding: 20px; border: 2px solid #ef4444; border-radius: 8px; text-align: center; background: #fef2f2; }
+					.suspect-photo { max-width: 200px; max-height: 250px; border: 2px solid #ef4444; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+					.custody-details { margin: 30px 0; padding: 20px; border: 1px solid #d1d5db; border-radius: 8px; background: #f9fafb; }
+					.custody-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 15px; }
+					.custody-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dotted #d1d5db; }
+					.custody-label { font-weight: bold; color: #4b5563; }
+					.custody-value { color: #1f2937; }
+					.footer-section { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; }
+					.officer-details { background: #f1f5f9; padding: 15px 20px; border-radius: 8px; border-left: 4px solid #ef4444; }
+					.classification-stamp { position: absolute; top: 10px; right: 10px; background: #dc2626; color: white; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; transform: rotate(15deg); }
+					@media print { 
+						body { margin: 0; } 
+						@page { margin: 1.5cm; size: A4; }
+						.letterhead { margin: -20px -20px 20px -20px; }
+					}
 				</style>
 			</head>
 			<body>
-				<div class="header">
-					<h1 class="title">NIGERIA POLICE FORCE - ARREST REPORT</h1>
-					<p>Digital Records System | Custody Management</p>
+				<div class="classification-stamp">CUSTODY</div>
+				<div class="letterhead">
+					<div class="agency-logo">★</div>
+					<div class="agency-details">
+						<h1 class="agency-name">NIGERIA POLICE FORCE</h1>
+						<div class="agency-subtitle">Digital Records System - Custody Management</div>
+						<div class="report-type">ARREST REPORT & BOOKING RECORD</div>
+					</div>
+					<div class="report-meta">
+						<div><strong>Report ID:</strong> ${arrest.id}</div>
+						<div><strong>Generated:</strong> ${new Date().toLocaleDateString()}</div>
+						<div><strong>Time:</strong> ${new Date().toLocaleTimeString()}</div>
+					</div>
 				</div>
 				<div class="arrest-info">
-					<div class="info-item"><div class="info-label">Arrest ID</div><div>${arrest.id}</div></div>
-					<div class="info-item"><div class="info-label">Status</div><div>${arrest.status}</div></div>
-					<div class="info-item"><div class="info-label">Suspect Name</div><div>${arrest.suspectName}</div></div>
-					<div class="info-item"><div class="info-label">Crime</div><div>${arrest.crime}</div></div>
-					<div class="info-item"><div class="info-label">Assigned Officer</div><div>${arrest.assignedOfficer}</div></div>
-					<div class="info-item"><div class="info-label">Date & Time</div><div>${new Date(arrest.date).toLocaleString()}</div></div>
-					<div class="info-item"><div class="info-label">Arrest Record</div><div>NPF Digital System</div></div>
-					<div class="info-item"><div class="info-label">Classification</div><div>CUSTODY</div></div>
+					<div class="info-item">
+						<div class="info-label">Arrest ID</div>
+						<div class="info-value">${arrest.id}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Suspect Name</div>
+						<div class="info-value">${arrest.suspectName}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Crime Classification</div>
+						<div class="info-value">${arrest.crime}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Custody Status</div>
+						<div class="info-value" style="color: ${arrest.status === 'In Custody' ? '#dc2626' : '#059669'}; font-weight: bold;">${arrest.status.toUpperCase()}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Arrest Date</div>
+						<div class="info-value">${new Date(arrest.date).toLocaleDateString()}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Arrest Time</div>
+						<div class="info-value">${new Date(arrest.date).toLocaleTimeString()}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Record System</div>
+						<div class="info-value">NPF Digital System</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Classification</div>
+						<div class="info-value">CUSTODY RECORD</div>
+					</div>
 				</div>
 				<div class="photo-section">
-					<div class="info-label">Suspect Photo</div>
+					<div class="info-label" style="font-size: 14px; margin-bottom: 15px;">SUSPECT IDENTIFICATION PHOTO</div>
 					<img src="${arrest.photoBase64}" alt="Suspect Photo" class="suspect-photo" />
 				</div>
-				<div style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px; font-size: 10px; color: #666; text-align: center;">
-					<p>Generated on ${new Date().toLocaleString()} | Nigeria Police Force DRS</p>
-					<p>This document contains confidential information and is for official use only.</p>
+				<div class="custody-details">
+					<div class="info-label" style="font-size: 14px; margin-bottom: 15px;">CUSTODY & BOOKING DETAILS</div>
+					<div class="custody-grid">
+						<div class="custody-item">
+							<span class="custody-label">Booking Date:</span>
+							<span class="custody-value">${new Date(arrest.date).toLocaleDateString()}</span>
+						</div>
+						<div class="custody-item">
+							<span class="custody-label">Booking Time:</span>
+							<span class="custody-value">${new Date(arrest.date).toLocaleTimeString()}</span>
+						</div>
+						<div class="custody-item">
+							<span class="custody-label">Custody Facility:</span>
+							<span class="custody-value">NPF Detention Center</span>
+						</div>
+						<div class="custody-item">
+							<span class="custody-label">Security Level:</span>
+							<span class="custody-value" style="color: #dc2626; font-weight: bold;">HIGH SECURITY</span>
+						</div>
+					</div>
+				</div>
+				<div class="footer-section">
+					<div class="officer-details">
+						<div class="info-label" style="font-size: 12px; margin-bottom: 10px;">ARRESTING OFFICER DETAILS</div>
+						<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+							<div>
+								<div class="custody-label">Officer Name:</div>
+								<div class="custody-value">${arrest.assignedOfficer}</div>
+							</div>
+							<div>
+								<div class="custody-label">Badge Number:</div>
+								<div class="custody-value">#NPF-54321</div>
+							</div>
+							<div>
+								<div class="custody-label">Department:</div>
+								<div class="custody-value">Arrest & Custody Unit</div>
+							</div>
+						</div>
+					</div>
+					<div style="margin-top: 30px; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 11px; color: #64748b; text-align: center;">
+						<div style="font-weight: bold; color: #1e293b; margin-bottom: 5px;">NIGERIA POLICE FORCE - DIGITAL RECORDS SYSTEM</div>
+						<div>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()} | Document Classification: CUSTODY RECORD</div>
+						<div style="margin-top: 5px; font-style: italic;">This document contains confidential custody information and is for official use only.</div>
+					</div>
 				</div>
 			</body>
 			</html>

@@ -73,40 +73,108 @@ export default function CasesPage() {
 			<head>
 				<title>Case Report - ${caseRecord.id}</title>
 				<style>
-					body { font-family: 'Courier New', monospace; margin: 40px; line-height: 1.6; }
-					.header { border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
-					.title { font-size: 24px; font-weight: bold; color: #3b82f6; }
-					.case-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-					.info-item { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-					.info-label { font-weight: bold; color: #555; font-size: 12px; text-transform: uppercase; margin-bottom: 5px; }
-					.description-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
-					@media print { body { margin: 0; } @page { margin: 2cm; } }
+					body { font-family: 'Arial', sans-serif; margin: 20px; line-height: 1.4; color: #333; }
+					.letterhead { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 30px 40px; margin: -20px -20px 30px -20px; position: relative; }
+					.letterhead::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+					.agency-logo { width: 60px; height: 60px; background: #3b82f6; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; float: left; margin-right: 20px; }
+					.agency-details { overflow: hidden; }
+					.agency-name { font-size: 28px; font-weight: bold; margin: 0 0 5px 0; color: #3b82f6; }
+					.agency-subtitle { font-size: 16px; margin: 0 0 8px 0; color: #cbd5e1; }
+					.report-type { font-size: 14px; font-weight: bold; color: #fbbf24; margin: 0; }
+					.report-meta { position: absolute; top: 30px; right: 40px; text-align: right; font-size: 11px; color: #94a3b8; }
+					.case-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+					.info-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
+					.info-label { font-weight: bold; color: #475569; font-size: 11px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+					.info-value { color: #1e293b; font-size: 14px; font-weight: 500; }
+					.description-section { margin: 30px 0; padding: 20px; border: 2px solid #3b82f6; border-radius: 8px; background: #eff6ff; }
+					.footer-section { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; }
+					.officer-details { background: #f1f5f9; padding: 15px 20px; border-radius: 8px; border-left: 4px solid #3b82f6; }
+					.classification-stamp { position: absolute; top: 10px; right: 10px; background: #059669; color: white; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; transform: rotate(15deg); }
+					@media print { 
+						body { margin: 0; } 
+						@page { margin: 1.5cm; size: A4; }
+						.letterhead { margin: -20px -20px 20px -20px; }
+					}
 				</style>
 			</head>
 			<body>
-				<div class="header">
-					<h1 class="title">NIGERIA POLICE FORCE - CASE REPORT</h1>
-					<p>Digital Records System | Criminal Investigation</p>
+				<div class="classification-stamp">CASE FILE</div>
+				<div class="letterhead">
+					<div class="agency-logo">★</div>
+					<div class="agency-details">
+						<h1 class="agency-name">NIGERIA POLICE FORCE</h1>
+						<div class="agency-subtitle">Digital Records System - Criminal Investigation</div>
+						<div class="report-type">CASE REPORT & INVESTIGATION RECORD</div>
+					</div>
+					<div class="report-meta">
+						<div><strong>Report ID:</strong> ${caseRecord.id}</div>
+						<div><strong>Generated:</strong> ${new Date().toLocaleDateString()}</div>
+						<div><strong>Time:</strong> ${new Date().toLocaleTimeString()}</div>
+					</div>
 				</div>
 				<div class="case-info">
-					<div class="info-item"><div class="info-label">Case ID</div><div>${caseRecord.id}</div></div>
-					<div class="info-item"><div class="info-label">Status</div><div>${caseRecord.status}</div></div>
-					<div class="info-item"><div class="info-label">Crime Type</div><div>${caseRecord.crimeType}</div></div>
-					<div class="info-item"><div class="info-label">Suspect</div><div>${caseRecord.suspect || 'N/A'}</div></div>
-					<div class="info-item"><div class="info-label">Investigating Officer</div><div>${caseRecord.officer}</div></div>
-					<div class="info-item"><div class="info-label">Date & Time</div><div>${new Date(caseRecord.date).toLocaleString()}</div></div>
-					<div class="info-item"><div class="info-label">Case Record</div><div>NPF Digital System</div></div>
-					<div class="info-item"><div class="info-label">Classification</div><div>CRIMINAL</div></div>
+					<div class="info-item">
+						<div class="info-label">Case ID</div>
+						<div class="info-value">${caseRecord.id}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Case Status</div>
+						<div class="info-value" style="color: ${caseRecord.status === 'Open' ? '#059669' : caseRecord.status === 'Closed' ? '#dc2626' : '#d97706'}; font-weight: bold;">${caseRecord.status.toUpperCase()}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Crime Classification</div>
+						<div class="info-value">${caseRecord.crimeType}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Suspect Information</div>
+						<div class="info-value">${caseRecord.suspect || 'Unknown/Under Investigation'}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Incident Date</div>
+						<div class="info-value">${new Date(caseRecord.date).toLocaleDateString()}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Incident Time</div>
+						<div class="info-value">${new Date(caseRecord.date).toLocaleTimeString()}</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Record System</div>
+						<div class="info-value">NPF Digital System</div>
+					</div>
+					<div class="info-item">
+						<div class="info-label">Classification</div>
+						<div class="info-value">CRIMINAL CASE</div>
+					</div>
 				</div>
 				${caseRecord.description ? `
 				<div class="description-section">
-					<div class="info-label">Case Description</div>
-					<p>${caseRecord.description}</p>
+					<div class="info-label" style="font-size: 14px; margin-bottom: 15px;">CASE DESCRIPTION & NARRATIVE</div>
+					<p style="line-height: 1.6; color: #1f2937;">${caseRecord.description}</p>
 				</div>
 				` : ''}
-				<div style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px; font-size: 10px; color: #666; text-align: center;">
-					<p>Generated on ${new Date().toLocaleString()} | Nigeria Police Force DRS</p>
-					<p>This document contains confidential information and is for official use only.</p>
+				<div class="footer-section">
+					<div class="officer-details">
+						<div class="info-label" style="font-size: 12px; margin-bottom: 10px;">INVESTIGATING OFFICER DETAILS</div>
+						<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+							<div>
+								<div class="info-label">Officer Name:</div>
+								<div class="info-value">${caseRecord.officer}</div>
+							</div>
+							<div>
+								<div class="info-label">Badge Number:</div>
+								<div class="info-value">#NPF-67890</div>
+							</div>
+							<div>
+								<div class="info-label">Department:</div>
+								<div class="info-value">Criminal Investigation Unit</div>
+							</div>
+						</div>
+					</div>
+					<div style="margin-top: 30px; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 11px; color: #64748b; text-align: center;">
+						<div style="font-weight: bold; color: #1e293b; margin-bottom: 5px;">NIGERIA POLICE FORCE - DIGITAL RECORDS SYSTEM</div>
+						<div>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()} | Document Classification: CASE FILE</div>
+						<div style="margin-top: 5px; font-style: italic;">This document contains confidential case information and is for official use only.</div>
+					</div>
 				</div>
 			</body>
 			</html>

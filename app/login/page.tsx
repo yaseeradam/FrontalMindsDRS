@@ -8,21 +8,29 @@ import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 import { writeStore } from "@/lib/storage";
 import { toast } from "sonner";
+import { useState } from "react";
 
 
 export default function LoginPage() {
+	const [imageError, setImageError] = useState(false);
+	
 	return (
 		<div className="min-h-screen relative flex items-center justify-center">
 			{/* Full-screen background image */}
 			<div className="absolute inset-0 z-0">
-				<Image 
-					src="/bg.jpg"
-					alt="Police HQ Background"
-					fill
-					className="object-cover"
-					priority
-					quality={100}
-				/>
+				{!imageError ? (
+					<Image 
+						src="/bg.jpg"
+						alt="Police HQ Background"
+						fill
+						className="object-cover"
+						priority
+						quality={100}
+						onError={() => setImageError(true)}
+					/>
+				) : (
+					<div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800" />
+				)}
 				{/* Multiple overlay layers for modern effect */}
 				<div className="absolute inset-0 bg-black/40" />
 				<div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background/20" />

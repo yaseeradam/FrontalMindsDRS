@@ -1,6 +1,6 @@
 "use client";
 
-import { CaseRecord, ArrestRecord, PatrolRecord, readStore, writeStore, generateId } from "@/lib/storage";
+import { CaseRecord, ArrestRecord, PatrolRecord, EvidenceRecord, readStore, writeStore, generateId } from "@/lib/storage";
 
 // Nigerian suspect names for realistic demo data
 const suspectNames = [
@@ -10,11 +10,18 @@ const suspectNames = [
 	"Blessing Okwu", "Musa Ibrahim", "Adunni Fagbemi", "Chukwuma Okoye", "Amina Hassan"
 ];
 
-// Function to get random face image from 0001-0028
+// Function to get random image from public folder (000001.jpg to 000020.png)
+function getRandomImage(): string {
+	const randomNum = Math.floor(Math.random() * 20) + 1;
+	const paddedNum = String(randomNum).padStart(6, '0');
+	// Images 1-19 are .jpg, image 20 is .png
+	const extension = randomNum === 20 ? 'png' : 'jpg';
+	return `/${paddedNum}.${extension}`;
+}
+
+// Function to get random face image (same as getRandomImage but for clarity)
 function getRandomFaceImage(): string {
-	const randomNum = Math.floor(Math.random() * 28) + 1;
-	const paddedNum = String(randomNum).padStart(4, '0');
-	return `/${paddedNum}.jpg`;
+	return getRandomImage();
 }
 
 const locations = [
@@ -61,12 +68,29 @@ const patrolNotes = [
 	"School safety patrol completed, students and staff reported feeling secure."
 ];
 
+const evidenceTypes = [
+	{ filename: "crime_scene_photo.jpg", mimeType: "image/jpeg" },
+	{ filename: "suspect_identification.png", mimeType: "image/png" },
+	{ filename: "evidence_bag_contents.jpg", mimeType: "image/jpeg" },
+	{ filename: "cctv_footage_still.jpg", mimeType: "image/jpeg" },
+	{ filename: "fingerprint_evidence.png", mimeType: "image/png" },
+	{ filename: "weapon_recovery.jpg", mimeType: "image/jpeg" },
+	{ filename: "vehicle_damage.jpg", mimeType: "image/jpeg" },
+	{ filename: "stolen_property.png", mimeType: "image/png" },
+	{ filename: "arrest_scene.jpg", mimeType: "image/jpeg" },
+	{ filename: "witness_statement_photo.jpg", mimeType: "image/jpeg" },
+	{ filename: "drug_seizure.png", mimeType: "image/png" },
+	{ filename: "document_evidence.jpg", mimeType: "image/jpeg" },
+	{ filename: "surveillance_capture.jpg", mimeType: "image/jpeg" },
+	{ filename: "physical_evidence.png", mimeType: "image/png" },
+	{ filename: "scene_overview.jpg", mimeType: "image/jpeg" }
+];
+
 export function ensureSeed() {
 	// Force regenerate with new face images - always regenerate
 	// Cases - Generate 15 realistic cases
 	const cases = readStore<CaseRecord[]>("cases", []);
-	// Force regenerate to use new face images
-	if (true) { // Always regenerate for now
+	if (!cases || cases.length < 15) {
 		const seeded: CaseRecord[] = Array.from({ length: 15 }).map((_, i) => ({
 			id: generateId("CASE"),
 			officer: officers[i % officers.length],
@@ -83,8 +107,7 @@ export function ensureSeed() {
 
 	// Arrests - Generate 12 realistic arrests
 	const arrests = readStore<ArrestRecord[]>("arrests", []);
-	// Force regenerate to use new face images
-	if (true) { // Always regenerate for now
+	if (!arrests || arrests.length < 12) {
 		const seeded: ArrestRecord[] = Array.from({ length: 12 }).map((_, i) => ({
 			id: generateId("ARREST"),
 			suspectName: suspectNames[i % suspectNames.length],
@@ -100,8 +123,7 @@ export function ensureSeed() {
 
 	// Patrols - Generate 18 patrol logs
 	const patrols = readStore<PatrolRecord[]>("patrols", []);
-	// Force regenerate
-	if (true) { // Always regenerate for now
+	if (!patrols || patrols.length < 18) {
 		const seeded: PatrolRecord[] = Array.from({ length: 18 }).map((_, i) => {
 			const date = new Date(Date.now() - (i * 21600000) - Math.random() * 21600000);
 			return {
@@ -115,6 +137,47 @@ export function ensureSeed() {
 			};
 		});
 		writeStore("patrols", seeded);
+	}
+
+	// Evidence - Generate evidence records for cases and arrests
+	const evidence = readStore<EvidenceRecord[]>("evidence", []);
+	if (!evidence || evidence.length < 25) {
+		const currentCases = readStore<CaseRecord[]>("cases", []);
+		const currentArrests = readStore<ArrestRecord[]>("arrests", []);
+		
+		const seeded: EvidenceRecord[] = [];
+		
+		// Create evidence for cases
+		currentCases.slice(0, 15).forEach((caseRecord, i) => {
+			const evidenceType = evidenceTypes[i % evidenceTypes.length];
+			const randomImage = getRandomImage();
+			seeded.push({
+				id: generateId("EVIDENCE"),
+				filename: evidenceType.filename,
+				mimeType: evidenceType.mimeType,
+				size: Math.floor(Math.random() * 2000000) + 500000, // Random size between 500KB - 2.5MB
+				previewBase64: randomImage,
+				ownerType: "case",
+				ownerId: caseRecord.id
+			});
+		});
+		
+		// Create evidence for arrests
+		currentArrests.slice(0, 10).forEach((arrestRecord, i) => {
+			const evidenceType = evidenceTypes[(i + 15) % evidenceTypes.length];
+			const randomImage = getRandomImage();
+			seeded.push({
+				id: generateId("EVIDENCE"),
+				filename: evidenceType.filename,
+				mimeType: evidenceType.mimeType,
+				size: Math.floor(Math.random() * 1500000) + 300000, // Random size between 300KB - 1.8MB
+				previewBase64: randomImage,
+				ownerType: "arrest",
+				ownerId: arrestRecord.id
+			});
+		});
+		
+		writeStore("evidence", seeded);
 	}
 }
 

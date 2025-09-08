@@ -3,9 +3,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Plus, FileDown, RefreshCcw, FolderKanban, Gavel, Shield, CircleDot } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { readStore, type CaseRecord, type ArrestRecord, type PatrolRecord } from "@/lib/storage";
-import { resetAndRegenerateData } from "@/lib/seed";
+import { ensureSeed } from "@/lib/seed";
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip as RTooltip, CartesianGrid } from "recharts";
 
 type CrimeSlice = { name: string; value: number };
@@ -18,8 +19,8 @@ export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		// Force regeneration of sample data with realistic Nigerian data
-		resetAndRegenerateData();
+		// Ensure sample data exists
+		ensureSeed();
 		const cases = readStore("cases", [] as CaseRecord[]);
 		const arrests = readStore("arrests", [] as ArrestRecord[]);
 		const patrols = readStore("patrols", [] as PatrolRecord[]);
@@ -105,25 +106,35 @@ export default function DashboardPage() {
 					</div>
 				</div>
 				<div className="grid md:grid-cols-5 gap-3">
-					<Button className="h-12 flex-col gap-1 bg-primary hover:bg-primary/90">
-						<Plus className="h-4 w-4" />
-						<span className="text-xs font-mono">NEW CASE</span>
+					<Button className="h-12 flex-col gap-1 bg-primary hover:bg-primary/90" asChild>
+						<Link href="/cases/new">
+							<Plus className="h-4 w-4" />
+							<span className="text-xs font-mono">NEW CASE</span>
+						</Link>
 					</Button>
-					<Button variant="outline" className="h-12 flex-col gap-1 border-red-500/30 hover:bg-red-500/10">
-						<Plus className="h-4 w-4" />
-						<span className="text-xs font-mono">ARREST</span>
+					<Button variant="outline" className="h-12 flex-col gap-1 border-red-500/30 hover:bg-red-500/10" asChild>
+						<Link href="/arrests/new">
+							<Plus className="h-4 w-4" />
+							<span className="text-xs font-mono">ARREST</span>
+						</Link>
 					</Button>
-					<Button variant="outline" className="h-12 flex-col gap-1 border-green-500/30 hover:bg-green-500/10">
-						<Plus className="h-4 w-4" />
-						<span className="text-xs font-mono">PATROL LOG</span>
+					<Button variant="outline" className="h-12 flex-col gap-1 border-green-500/30 hover:bg-green-500/10" asChild>
+						<Link href="/patrols/new">
+							<Plus className="h-4 w-4" />
+							<span className="text-xs font-mono">PATROL LOG</span>
+						</Link>
 					</Button>
-					<Button variant="outline" className="h-12 flex-col gap-1">
-						<RefreshCcw className="h-4 w-4" />
-						<span className="text-xs font-mono">SYNC HQ</span>
+					<Button variant="outline" className="h-12 flex-col gap-1" asChild>
+						<Link href="/sync">
+							<RefreshCcw className="h-4 w-4" />
+							<span className="text-xs font-mono">SYNC HQ</span>
+						</Link>
 					</Button>
-					<Button variant="outline" className="h-12 flex-col gap-1">
-						<FileDown className="h-4 w-4" />
-						<span className="text-xs font-mono">EXPORT</span>
+					<Button variant="outline" className="h-12 flex-col gap-1" asChild>
+						<Link href="/reports">
+							<FileDown className="h-4 w-4" />
+							<span className="text-xs font-mono">EXPORT</span>
+						</Link>
 					</Button>
 				</div>
 			</section>
