@@ -17,14 +17,27 @@ export default function ReportsPage() {
 	const [arrests, setArrests] = useState<ArrestRecord[]>([]);
 	const [patrols, setPatrols] = useState<PatrolRecord[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isRefreshing, setIsRefreshing] = useState(false);
 
 	useEffect(() => {
+		loadData();
+	}, []);
+	
+	const loadData = async () => {
+		setIsLoading(true);
 		ensureSeed();
+		await new Promise(resolve => setTimeout(resolve, 800)); // Simulate loading
 		setCases(readStore<CaseRecord[]>("cases", []));
 		setArrests(readStore<ArrestRecord[]>("arrests", []));
 		setPatrols(readStore<PatrolRecord[]>("patrols", []));
 		setIsLoading(false);
-	}, []);
+	};
+	
+	const handleRefresh = async () => {
+		setIsRefreshing(true);
+		await loadData();
+		setIsRefreshing(false);
+	};
 
 	const counts = useMemo(() => ({
 		cases: cases.length,
@@ -90,14 +103,14 @@ export default function ReportsPage() {
 			doc.rect(0, 0, pageWidth, 120, "F");
 			
 			// Police Badge/Shield Icon (simulated)
-			doc.setFillColor(56, 189, 248); // Blue accent
-			doc.circle(70, 60, 25, "F");
-			doc.setTextColor(255, 255, 255);
-			doc.setFontSize(16);
-			doc.setFont("helvetica", "bold");
-			doc.text("★", 63, 68);
+			// doc.setFillColor(56, 189, 248); // Blue accent
+			// doc.circle(70, 60, 25, "F");
+			// doc.setTextColor(255, 255, 255);
+			// doc.setFontSize(16);
+			// doc.setFont("helvetica", "bold");
+			// doc.text("★", 63, 68);
 			
-			// Main Title
+			// // Main Title
 			doc.setTextColor(56, 189, 248);
 			doc.setFontSize(28);
 			doc.setFont("helvetica", "bold");
@@ -113,23 +126,6 @@ export default function ReportsPage() {
 			doc.setFontSize(12);
 			doc.setFont("helvetica", "bold");
 			doc.text("COMPREHENSIVE ANALYTICS REPORT", 120, 85);
-			
-			// Report metadata box
-			doc.setFillColor(240, 240, 240);
-			doc.rect(400, 20, 170, 80, "F");
-			doc.setDrawColor(56, 189, 248);
-			doc.setLineWidth(2);
-			doc.rect(400, 20, 170, 80, "S");
-			
-			doc.setTextColor(0, 0, 0);
-			doc.setFontSize(10);
-			doc.setFont("helvetica", "bold");
-			doc.text("REPORT DETAILS", 410, 35);
-			doc.setFont("helvetica", "normal");
-			doc.text(`Date: ${new Date().toLocaleDateString()}`, 410, 50);
-			doc.text(`Time: ${new Date().toLocaleTimeString()}`, 410, 65);
-			doc.text(`Officer: A. MUSA (#12345)`, 410, 80);
-			doc.text(`Classification: CONFIDENTIAL`, 410, 95);
 			
 			// Blue line separator
 			doc.setDrawColor(56, 189, 248);
@@ -323,11 +319,11 @@ export default function ReportsPage() {
 				doc.setTextColor(255, 255, 255);
 				doc.setFontSize(10);
 				doc.setFont("helvetica", "bold");
-				doc.text("CASE ID", 60, y + 15);
+doc.text("CASE ID", 60, y + 15);
 				doc.text("CRIME TYPE", 150, y + 15);
 				doc.text("OFFICER", 280, y + 15);
-				doc.text("STATUS", 400, y + 15);
-				doc.text("DATE", 470, y + 15);
+				doc.text("STATUS", 380, y + 15);
+				doc.text("DATE", 490, y + 15);
 				y += 25;
 				
 				// Table rows
@@ -343,11 +339,11 @@ export default function ReportsPage() {
 						doc.rect(50, y, 480, 20, "F");
 					}
 					
-					doc.text(String(rc.id || "-"), 60, y + 12);
+doc.text(String(rc.id || "-"), 60, y + 12);
 					doc.text(String(rc.crimeType || "-"), 150, y + 12);
 					doc.text(String(rc.officer || "-"), 280, y + 12);
-					doc.text(String(rc.status || "-"), 400, y + 12);
-					doc.text(new Date(rc.date).toLocaleDateString(), 470, y + 12);
+					doc.text(String(rc.status || "-"), 380, y + 12);
+					doc.text(new Date(rc.date).toLocaleDateString(), 490, y + 12);
 					y += 20;
 				}
 			} else {
@@ -355,6 +351,38 @@ export default function ReportsPage() {
 				doc.setFont("helvetica", "italic");
 				doc.text("No recent cases available", 60, y);
 			}
+			
+			// Add report metadata box to last page
+			if (y < pageHeight - 200) {
+				y = pageHeight - 180;
+			} else {
+				doc.addPage();
+				y = 50;
+			}
+			
+			// Report metadata box at bottom
+			doc.setFillColor(240, 248, 255); // Light blue background
+			doc.rect(50, y, pageWidth - 100, 100, "F");
+			doc.setDrawColor(56, 189, 248);
+			doc.setLineWidth(2);
+			doc.rect(50, y, pageWidth - 100, 100, "S");
+			
+			doc.setTextColor(0, 0, 0);
+			doc.setFontSize(14);
+			doc.setFont("helvetica", "bold");
+			doc.text("REPORT DETAILS & AUTHENTICATION", 60, y + 20);
+			
+			doc.setFontSize(11);
+			doc.setFont("helvetica", "normal");
+			doc.text(`Generated Date: ${new Date().toLocaleDateString()}`, 60, y + 40);
+			doc.text(`Generated Time: ${new Date().toLocaleTimeString()}`, 60, y + 55);
+			doc.text(`Reporting Officer: A. MUSA (#NPF-12345)`, 60, y + 70);
+			doc.text(`Document Classification: CONFIDENTIAL`, 60, y + 85);
+			
+			doc.text(`Total Records Analyzed: ${counts.cases + counts.arrests + counts.patrols}`, 320, y + 40);
+			doc.text(`Report Period: Last 7 Days`, 320, y + 55);
+			doc.text(`System: Braniacs DRS v1.0`, 320, y + 70);
+			doc.text(`Status: OFFICIAL REPORT`, 320, y + 85);
 			
 			// PROFESSIONAL FOOTER
 			const currentPage = doc.internal.pages.length - 1;
@@ -430,9 +458,14 @@ export default function ReportsPage() {
 							ANALYTICS ONLINE
 						</div>
 						<div className="flex gap-2">
-							<Button variant="outline" className="font-mono border-blue-500/30 hover:bg-blue-500/10">
-								<RefreshCcw className="h-4 w-4 mr-2" />
-								REFRESH
+							<Button 
+								variant="outline" 
+								className="font-mono border-blue-500/30 hover:bg-blue-500/10"
+								onClick={handleRefresh}
+								disabled={isRefreshing}
+							>
+								<RefreshCcw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+								{isRefreshing ? 'REFRESHING...' : 'REFRESH'}
 							</Button>
 						<Button onClick={exportPDF} className="font-mono bg-blue-500 hover:bg-blue-600">
 							<FileDown className="h-4 w-4 mr-2" />
