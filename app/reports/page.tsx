@@ -120,7 +120,7 @@ export default function ReportsPage() {
 			doc.setTextColor(255, 255, 255);
 			doc.setFontSize(16);
 			doc.setFont("helvetica", "normal");
-			doc.text("BRANIACS DIGITAL RECORDS SYSTEM", 120, 65);
+			doc.text("FRONTALMINDS DIGITAL RECORDS SYSTEM", 120, 65);
 			
 			// Report type
 			doc.setFontSize(12);
@@ -381,7 +381,7 @@ doc.text(String(rc.id || "-"), 60, y + 12);
 			
 			doc.text(`Total Records Analyzed: ${counts.cases + counts.arrests + counts.patrols}`, 320, y + 40);
 			doc.text(`Report Period: Last 7 Days`, 320, y + 55);
-			doc.text(`System: Braniacs DRS v1.0`, 320, y + 70);
+			doc.text(`System: FrontalMinds DRS v1.0`, 320, y + 70);
 			doc.text(`Status: OFFICIAL REPORT`, 320, y + 85);
 			
 			// PROFESSIONAL FOOTER
@@ -398,7 +398,7 @@ doc.text(String(rc.id || "-"), 60, y + 12);
 				doc.setTextColor(100, 100, 100);
 				doc.setFontSize(9);
 				doc.setFont("helvetica", "normal");
-				doc.text("Nigeria Police Force - Braniacs Digital Records System", 50, pageHeight - 30);
+				doc.text("Nigeria Police Force - FrontalMinds Digital Records System", 50, pageHeight - 30);
 				doc.text("CONFIDENTIAL DOCUMENT - FOR OFFICIAL USE ONLY", 50, pageHeight - 18);
 				
 				// Page number
@@ -427,7 +427,7 @@ doc.text(String(rc.id || "-"), 60, y + 12);
 			doc.text("NIGERIA POLICE FORCE", 50, 35);
 			doc.setTextColor(255, 255, 255);
 			doc.setFontSize(14);
-			doc.text("BRANIACS DRS - BASIC ANALYTICS REPORT", 50, 55);
+			doc.text("FRONTALMINDS DRS - BASIC ANALYTICS REPORT", 50, 55);
 			
 			doc.setTextColor(0, 0, 0);
 			doc.setFontSize(16);

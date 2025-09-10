@@ -51,17 +51,16 @@ export default function ArrestsPage() {
 					.letterhead { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 30px 40px; margin: -20px -20px 30px -20px; position: relative; }
 					.letterhead::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #ef4444, #dc2626); }
 					.agency-logo { width: 60px; height: 60px; background: #ef4444; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; float: left; margin-right: 20px; }
-					.agency-details { overflow: hidden; }
+					.agency-details { overflow: hidden; max-width: calc(100% - 300px); }
 					.agency-name { font-size: 28px; font-weight: bold; margin: 0 0 5px 0; color: #ef4444; }
 					.agency-subtitle { font-size: 16px; margin: 0 0 8px 0; color: #cbd5e1; }
 					.report-type { font-size: 14px; font-weight: bold; color: #fbbf24; margin: 0; }
-					.report-meta { position: absolute; top: 30px; right: 40px; text-align: right; font-size: 11px; color: #94a3b8; }
+					.report-meta { position: absolute; top: 30px; right: 200px; text-align: right; font-size: 11px; color: #94a3b8; }
+					.suspect-photo-header { position: absolute; top: 30px; right: 40px; width: 120px; height: 120px; object-fit: cover; border: 3px solid #ef4444; border-radius: 8px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
 					.arrest-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
 					.info-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
 					.info-label { font-weight: bold; color: #475569; font-size: 11px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
 					.info-value { color: #1e293b; font-size: 14px; font-weight: 500; }
-					.photo-section { margin: 30px 0; padding: 20px; border: 2px solid #ef4444; border-radius: 8px; text-align: center; background: #fef2f2; }
-					.suspect-photo { max-width: 200px; max-height: 250px; border: 2px solid #ef4444; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 					.custody-details { margin: 30px 0; padding: 20px; border: 1px solid #d1d5db; border-radius: 8px; background: #f9fafb; }
 					.custody-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 15px; }
 					.custody-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dotted #d1d5db; }
@@ -80,6 +79,7 @@ export default function ArrestsPage() {
 			<body>
 				<div class="classification-stamp">CUSTODY</div>
 				<div class="letterhead">
+					<img src="${arrest.photoBase64}" alt="Suspect Photo" class="suspect-photo-header" />
 					<div class="agency-logo">★</div>
 					<div class="agency-details">
 						<h1 class="agency-name">NIGERIA POLICE FORCE</h1>
@@ -125,10 +125,6 @@ export default function ArrestsPage() {
 						<div class="info-label">Classification</div>
 						<div class="info-value">CUSTODY RECORD</div>
 					</div>
-				</div>
-				<div class="photo-section">
-					<div class="info-label" style="font-size: 14px; margin-bottom: 15px;">SUSPECT IDENTIFICATION PHOTO</div>
-					<img src="${arrest.photoBase64}" alt="Suspect Photo" class="suspect-photo" />
 				</div>
 				<div class="custody-details">
 					<div class="info-label" style="font-size: 14px; margin-bottom: 15px;">CUSTODY & BOOKING DETAILS</div>

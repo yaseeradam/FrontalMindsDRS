@@ -90,11 +90,11 @@ export default function SettingsPage() {
 
 	useEffect(() => {
 		// Load settings from localStorage
-		const savedSettings = localStorage.getItem('braniacs-drs-settings');
+		const savedSettings = localStorage.getItem('frontalminds-drs-settings');
 		if (savedSettings) {
 			setSettings(JSON.parse(savedSettings));
 		}
-		const savedTime = localStorage.getItem('braniacs-drs-settings-time');
+		const savedTime = localStorage.getItem('frontalminds-drs-settings-time');
 		if (savedTime) {
 			setLastSaved(new Date(savedTime));
 		}
@@ -107,9 +107,9 @@ export default function SettingsPage() {
 			await new Promise(resolve => setTimeout(resolve, 1000));
 			
 			// Save to localStorage
-			localStorage.setItem('braniacs-drs-settings', JSON.stringify(settings));
+			localStorage.setItem('frontalminds-drs-settings', JSON.stringify(settings));
 			const now = new Date();
-			localStorage.setItem('braniacs-drs-settings-time', now.toISOString());
+			localStorage.setItem('frontalminds-drs-settings-time', now.toISOString());
 			setLastSaved(now);
 		} finally {
 			setIsSaving(false);
@@ -118,8 +118,8 @@ export default function SettingsPage() {
 
 	const handleReset = () => {
 		if (confirm('Are you sure you want to reset all settings to default values?')) {
-			localStorage.removeItem('braniacs-drs-settings');
-			localStorage.removeItem('braniacs-drs-settings-time');
+			localStorage.removeItem('frontalminds-drs-settings');
+			localStorage.removeItem('frontalminds-drs-settings-time');
 			window.location.reload();
 		}
 	};

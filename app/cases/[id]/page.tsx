@@ -45,22 +45,37 @@ export default function CaseDetailPage() {
 						margin: 40px;
 						line-height: 1.6;
 						color: #000;
+						position: relative;
 					}
 					.header {
 						border-bottom: 3px solid #3b82f6;
 						padding-bottom: 20px;
 						margin-bottom: 30px;
+						position: relative;
+					}
+					.case-image {
+						position: absolute;
+						top: 0;
+						right: 0;
+						width: 120px;
+						height: 120px;
+						object-fit: cover;
+						border: 2px solid #3b82f6;
+						border-radius: 8px;
+						box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 					}
 					.title {
 						font-size: 24px;
 						font-weight: bold;
 						color: #3b82f6;
 						margin: 0;
+						max-width: calc(100% - 140px);
 					}
 					.subtitle {
 						font-size: 12px;
 						color: #666;
 						margin: 5px 0 0 0;
+						max-width: calc(100% - 140px);
 					}
 					.case-info {
 						display: grid;
@@ -114,7 +129,8 @@ export default function CaseDetailPage() {
 			</head>
 			<body>
 				<div class="header">
-					<h1 class="title">BRANIACS POLICE DRS</h1>
+					${record.photoBase64 ? `<img src="${record.photoBase64}" alt="Case Evidence" class="case-image" />` : ''}
+					<h1 class="title">FRONTALMINDS POLICE DRS</h1>
 					<p class="subtitle">Digital Records System - Case Report</p>
 				</div>
 				
@@ -151,7 +167,7 @@ export default function CaseDetailPage() {
 				</div>
 				
 				<div class="footer">
-					<p>Generated on ${new Date().toLocaleString()} | Braniacs Police DRS</p>
+					<p>Generated on ${new Date().toLocaleString()} | FrontalMinds Police DRS</p>
 					<p>This document contains confidential information and is for official use only.</p>
 				</div>
 			</body>

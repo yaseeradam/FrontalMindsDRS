@@ -48,7 +48,7 @@ export default function LoginPage() {
 									<Shield className="h-8 w-8 text-primary drop-shadow-[0_0_12px_rgba(56,189,248,0.5)]" />
 								</div>
 							</div>
-							<h1 className="text-2xl font-bold tracking-wider text-foreground font-mono">BRANIACS DRS</h1>
+							<h1 className="text-2xl font-bold tracking-wider text-foreground font-mono">FRONTALMINDS DRS</h1>
 							<p className="text-sm text-muted-foreground font-mono">SECURE OFFICER ACCESS PORTAL</p>
 							<div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 						</div>

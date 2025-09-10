@@ -29,7 +29,7 @@ export function Navbar() {
 	
 	useEffect(() => {
 		// Load notifications from localStorage or generate sample data
-		const savedNotifications = localStorage.getItem('braniacs-drs-notifications');
+		const savedNotifications = localStorage.getItem('frontalminds-drs-notifications');
 		if (savedNotifications) {
 			const parsed = JSON.parse(savedNotifications).map((n: any) => ({
 				...n,
@@ -65,7 +65,7 @@ export function Navbar() {
 				}
 			];
 			setNotifications(sampleNotifications);
-			localStorage.setItem('braniacs-drs-notifications', JSON.stringify(sampleNotifications));
+			localStorage.setItem('frontalminds-drs-notifications', JSON.stringify(sampleNotifications));
 		}
 	}, []);
 	
@@ -76,19 +76,19 @@ export function Navbar() {
 			n.id === id ? { ...n, read: true } : n
 		);
 		setNotifications(updated);
-		localStorage.setItem('braniacs-drs-notifications', JSON.stringify(updated));
+		localStorage.setItem('frontalminds-drs-notifications', JSON.stringify(updated));
 	};
 	
 	const markAllAsRead = () => {
 		const updated = notifications.map(n => ({ ...n, read: true }));
 		setNotifications(updated);
-		localStorage.setItem('braniacs-drs-notifications', JSON.stringify(updated));
+		localStorage.setItem('frontalminds-drs-notifications', JSON.stringify(updated));
 	};
 	
 	const clearNotification = (id: string) => {
 		const updated = notifications.filter(n => n.id !== id);
 		setNotifications(updated);
-		localStorage.setItem('braniacs-drs-notifications', JSON.stringify(updated));
+		localStorage.setItem('frontalminds-drs-notifications', JSON.stringify(updated));
 	};
 	
 	const getRelativeTime = (timestamp: Date) => {
@@ -113,9 +113,9 @@ export function Navbar() {
 	const handleLogout = () => {
 		if (confirm('Are you sure you want to logout?')) {
 			// Clear any stored authentication data
-			localStorage.removeItem('braniacs-drs-auth');
-			localStorage.removeItem('braniacs-drs-settings');
-			localStorage.removeItem('braniacs-drs-session');
+			localStorage.removeItem('frontalminds-drs-auth');
+			localStorage.removeItem('frontalminds-drs-settings');
+			localStorage.removeItem('frontalminds-drs-session');
 			
 			// Clear session storage
 			sessionStorage.clear();

@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-	title: "Braniacs Police DRS (Prototype)",
+	title: "FrontalMinds Police DRS (Prototype)",
 	description: "UI-only demo for Digital Records System",
 };
 

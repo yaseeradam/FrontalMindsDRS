@@ -29,7 +29,7 @@ export default function NotFound() {
               SYSTEM NOTIFICATION
             </div>
             <div className="text-sm text-foreground font-mono text-center">
-              Page not found in Braniacs Police DRS
+              Page not found in FrontalMinds Police DRS
             </div>
             
             <div className="flex flex-col gap-3 pt-4">
@@ -51,7 +51,7 @@ export default function NotFound() {
         </div>
         
         <div className="text-xs text-muted-foreground font-mono">
-          BRANIACS POLICE DRS v0.1.0 | PROTOTYPE SYSTEM
+          FRONTALMINDS POLICE DRS v0.1.0 | PROTOTYPE SYSTEM
         </div>
       </div>
     </div>
