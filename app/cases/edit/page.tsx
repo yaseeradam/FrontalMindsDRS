@@ -22,6 +22,7 @@ function CaseEditForm() {
     const [officer, setOfficer] = useState("");
     const [suspect, setSuspect] = useState("");
     const [crimeType, setCrimeType] = useState("Burglary");
+    const [customCrimeType, setCustomCrimeType] = useState("");
     const [date, setDate] = useState<string>("");
     const [status, setStatus] = useState("Open");
     const [description, setDescription] = useState("");
@@ -35,7 +36,17 @@ function CaseEditForm() {
         setRecord(found);
         setOfficer(found.officer);
         setSuspect(found.suspect || "");
-        setCrimeType(found.crimeType);
+        
+        // Check if crime type is a custom one (not in predefined list)
+        const predefinedTypes = ["Burglary","Theft","Assault","Robbery","Vandalism","Traffic Violation","Domestic Violence","Drug Offense","Cybercrime","Fraud","Other"];
+        if (predefinedTypes.includes(found.crimeType)) {
+            setCrimeType(found.crimeType);
+            setCustomCrimeType("");
+        } else {
+            setCrimeType("Other");
+            setCustomCrimeType(found.crimeType);
+        }
+        
         setDate(new Date(found.date).toISOString().slice(0, 16));
         setStatus(found.status);
         setDescription(found.description || "");
@@ -51,6 +62,18 @@ function CaseEditForm() {
     async function save() {
         if (!record || isSubmitting) return;
         
+        const finalCrimeType = crimeType === "Other" ? customCrimeType.trim() : crimeType;
+        
+        if (!officer || !finalCrimeType || !date) {
+            toast.error("Please fill in all required fields");
+            return;
+        }
+        
+        if (crimeType === "Other" && !customCrimeType.trim()) {
+            toast.error("Please specify the crime type");
+            return;
+        }
+        
         setIsSubmitting(true);
         try {
             // Simulate API delay
@@ -61,7 +84,7 @@ function CaseEditForm() {
                 ...record,
                 officer,
                 suspect: suspect || undefined,
-                crimeType,
+                crimeType: finalCrimeType,
                 date: new Date(date).toISOString(),
                 status,
                 description: description || undefined,
@@ -138,11 +161,22 @@ function CaseEditForm() {
                             <Select value={crimeType} onValueChange={setCrimeType}>
                                 <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
                                 <SelectContent>
-                                    {["Burglary","Theft","Assault","Traffic","Cybercrime","Other"].map((t) => (
+                                    {["Burglary","Theft","Assault","Robbery","Vandalism","Traffic Violation","Domestic Violence","Drug Offense","Cybercrime","Fraud","Other"].map((t) => (
                                         <SelectItem key={t} value={t}>{t}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
+                            {crimeType === "Other" && (
+                                <div className="mt-2">
+                                    <Input
+                                        placeholder="Specify custom crime type"
+                                        value={customCrimeType}
+                                        onChange={(e) => setCustomCrimeType(e.target.value)}
+                                        required
+                                        className="border-orange-300 focus:border-orange-500"
+                                    />
+                                </div>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="date">Date & Time *</Label>

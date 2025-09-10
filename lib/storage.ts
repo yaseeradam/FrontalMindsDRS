@@ -58,7 +58,9 @@ type StorageKey =
 	| "patrols"
 	| "transfers"
 	| "evidence"
-	| "officer";
+	| "officer"
+	| "activity_logs"
+	| "current_user";
 
 export function readStore<T>(key: StorageKey, fallback: T): T {
 	if (typeof window === "undefined") return fallback;

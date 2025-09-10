@@ -13,9 +13,10 @@ import { Shield, AlertTriangle, Clock, User, FileText, MapPin, Camera, Upload } 
 import { ClientYear } from "@/components/ui/client-year";
 
 export default function CaseNewPage() {
-	const [officer, setOfficer] = useState("Officer A. Musa");
+	const [officer, setOfficer] = useState("Officer Musa Garba");
 	const [suspect, setSuspect] = useState("");
 	const [crimeType, setCrimeType] = useState("Burglary");
+	const [customCrimeType, setCustomCrimeType] = useState("");
 	const [date, setDate] = useState<string>("");
 	const [status, setStatus] = useState("Open");
 	const [description, setDescription] = useState("");
@@ -40,8 +41,15 @@ export default function CaseNewPage() {
 	async function submit() {
 		if (isSubmitting) return;
 		
-		if (!officer || !crimeType || !date) {
+		const finalCrimeType = crimeType === "Other" ? customCrimeType.trim() : crimeType;
+		
+		if (!officer || !finalCrimeType || !date) {
 			toast.error("Please fill in all required fields");
+			return;
+		}
+		
+		if (crimeType === "Other" && !customCrimeType.trim()) {
+			toast.error("Please specify the crime type");
 			return;
 		}
 		
@@ -55,7 +63,7 @@ export default function CaseNewPage() {
 				id,
 				officer,
 				suspect: suspect || undefined,
-				crimeType,
+				crimeType: finalCrimeType,
 				date: new Date(date).toISOString(),
 				status,
 				description: description || undefined,
@@ -173,6 +181,17 @@ export default function CaseNewPage() {
 									))}
 								</SelectContent>
 							</Select>
+							{crimeType === "Other" && (
+								<div className="mt-2">
+									<Input
+										placeholder="Specify crime type"
+										value={customCrimeType}
+										onChange={(e) => setCustomCrimeType(e.target.value)}
+										className="font-mono"
+										required
+									/>
+								</div>
+							)}
 						</div>
 
 						{/* Date & Time */}
@@ -339,14 +358,16 @@ export default function CaseNewPage() {
 						variant="ghost" 
 						className="font-mono text-muted-foreground hover:text-foreground"
 						onClick={() => {
-							setOfficer("Officer A. Musa");
+							setOfficer("Officer Musa Garba");
 							setSuspect("");
 							setCrimeType("Burglary");
+							setCustomCrimeType("");
 							setDate(new Date().toISOString().slice(0, 16));
 							setStatus("Open");
 							setDescription("");
 							setLocation("");
 							setPriority("Medium");
+							setPhotoBase64(undefined);
 						}}
 					>
 						RESET FORM

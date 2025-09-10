@@ -7,11 +7,13 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { PatrolRecord, readStore, writeStore } from "@/lib/storage";
 import { ensureSeed } from "@/lib/seed";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 export default function PatrolsPage() {
 	const [patrols, setPatrols] = useState<PatrolRecord[]>([]);
 	const [location, setLocation] = useState<string>("All");
 	const [q, setQ] = useState("");
+	const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; location: string }>({ open: false, id: "", location: "" });
 
 	useEffect(() => {
 		ensureSeed();
@@ -31,10 +33,15 @@ export default function PatrolsPage() {
 		return ["All", ...locations];
 	}, [patrols]);
 
-	function remove(id: string) {
-		const next = patrols.filter((p) => p.id !== id);
+	function openDeleteConfirm(id: string, location: string) {
+		setDeleteConfirm({ open: true, id, location });
+	}
+
+	function confirmDelete() {
+		const next = patrols.filter((p) => p.id !== deleteConfirm.id);
 		setPatrols(next);
 		writeStore("patrols", next);
+		setDeleteConfirm({ open: false, id: "", location: "" });
 	}
 
 	return (
@@ -176,7 +183,7 @@ export default function PatrolsPage() {
 										<Button size="sm" variant="outline" asChild className="flex-1 border-green-300 text-green-700 hover:bg-green-500 hover:text-white dark:border-green-600 dark:text-green-400 font-mono text-xs">
 											<Link href={`/patrols/new`}>NEW PATROL</Link>
 										</Button>
-										<Button size="sm" variant="destructive" onClick={() => remove(p.id)} className="px-3 font-mono text-xs">
+										<Button size="sm" variant="destructive" onClick={() => openDeleteConfirm(p.id, p.location)} className="px-3 font-mono text-xs">
 											DELETE
 										</Button>
 									</div>
@@ -186,6 +193,17 @@ export default function PatrolsPage() {
 					})}
 				</div>
 			)}
+
+			<ConfirmationDialog
+				open={deleteConfirm.open}
+				onOpenChange={(open) => setDeleteConfirm(prev => ({ ...prev, open }))}
+				title="Delete Patrol Record"
+				description={`Are you sure you want to delete the patrol record for "${deleteConfirm.location}"? This action cannot be undone.`}
+				confirmText="Delete"
+				cancelText="Cancel"
+				variant="destructive"
+				onConfirm={confirmDelete}
+			/>
 		</div>
 	);
 }

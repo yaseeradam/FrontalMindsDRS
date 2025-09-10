@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ArrowLeft, Edit, Trash2, Share, FileText } from "lucide-react";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 type RecordType = CaseRecord | ArrestRecord | PatrolRecord;
 
@@ -18,6 +19,7 @@ export default function RecordDetailPage() {
 	const router = useRouter();
 	const [record, setRecord] = useState<RecordType | null>(null);
 	const [recordType, setRecordType] = useState<"cases" | "arrests" | "patrols" | null>(null);
+	const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
 
 	useEffect(() => {
 		const type = params.type?.toLowerCase();
@@ -36,10 +38,20 @@ export default function RecordDetailPage() {
 		setRecord(found ?? null);
 	}, [params.type, params.id]);
 
-	function remove() {
+	function openDeleteConfirm() {
+		if (!record) return;
+		let name = "";
+		if (recordType === "cases") name = (record as CaseRecord).crimeType;
+		else if (recordType === "arrests") name = (record as ArrestRecord).suspectName;
+		else if (recordType === "patrols") name = (record as PatrolRecord).location;
+		setDeleteConfirm({ open: true, id: record.id, name });
+	}
+
+	function confirmDelete() {
 		if (!record || !recordType) return;
 		const all = readStore(recordType, [] as RecordType[]);
 		writeStore(recordType, all.filter((r) => r.id !== record.id));
+		setDeleteConfirm({ open: false, id: "", name: "" });
 		router.push("/records");
 	}
 
@@ -225,7 +237,7 @@ const getTypeColor = (type: string): BadgeVariant => {
 						<FileText className="h-4 w-4 mr-2" />
 						Export
 					</Button>
-					<Button variant="destructive" onClick={remove}>
+					<Button variant="destructive" onClick={openDeleteConfirm}>
 						<Trash2 className="h-4 w-4 mr-2" />
 						Delete
 					</Button>
@@ -309,6 +321,17 @@ const getTypeColor = (type: string): BadgeVariant => {
 					</Card>
 				</div>
 			</div>
+
+			<ConfirmationDialog
+				open={deleteConfirm.open}
+				onOpenChange={(open) => setDeleteConfirm(prev => ({ ...prev, open }))}
+				title="Delete Record"
+				description={`Are you sure you want to delete the ${recordType?.slice(0, -1) || "record"} "${deleteConfirm.name}"? This action cannot be undone.`}
+				confirmText="Delete"
+				cancelText="Cancel"
+				variant="destructive"
+				onConfirm={confirmDelete}
+			/>
 		</div>
 	);
 }

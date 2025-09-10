@@ -3,6 +3,9 @@ import { inter, orbitron } from "@/lib/fonts";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
 import { AppShell } from "@/components/layout/app-shell";
+import { LoadingWrapper } from "@/components/layout/loading-wrapper";
+import { LoadingProvider } from "@/contexts/loading-context";
+import { GlobalLoadingSpinner } from "@/components/ui/page-loading";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -21,8 +24,13 @@ export default function RootLayout({
       <body className={`${inter.variable} ${orbitron.variable} antialiased min-h-screen bg-background text-foreground`}>
         <ThemeProvider>
           <LanguageProvider>
-            <AppShell>{children}</AppShell>
-            <Toaster richColors position="top-right" />
+            <LoadingProvider>
+              <LoadingWrapper>
+                <AppShell>{children}</AppShell>
+                <GlobalLoadingSpinner />
+              </LoadingWrapper>
+              <Toaster richColors position="top-right" />
+            </LoadingProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

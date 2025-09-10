@@ -12,6 +12,7 @@ import {
 	Boxes,
 	RefreshCcw,
 	BarChart3,
+	Activity,
 	Settings,
     ChevronsLeftRight,
 } from "lucide-react";
@@ -23,6 +24,7 @@ const items = [
 	{ href: "/evidence", label: "EVIDENCE", icon: Boxes, description: "Digital Vault" },
 	{ href: "/dashboard", label: "COMMAND CENTER", icon: LayoutGrid, description: "Main Dashboard" },
 	{ href: "/records", label: "LAW ACTS", icon: Search, description: "Legal References" },
+	{ href: "/activity", label: "ACTIVITY LOG", icon: Activity, description: "System Audit" },
 	{ href: "/sync", label: "HQ SYNC", icon: RefreshCcw, description: "Data Transfer" },
 	{ href: "/reports", label: "ANALYTICS", icon: BarChart3, description: "Statistics" },
 	{ href: "/settings", label: "SYSTEM", icon: Settings, description: "Configuration" },

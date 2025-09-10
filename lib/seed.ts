@@ -1,13 +1,14 @@
 "use client";
 
 import { CaseRecord, ArrestRecord, PatrolRecord, EvidenceRecord, readStore, writeStore, generateId } from "@/lib/storage";
+import { logActivity } from "@/lib/activity-log";
 
-// Nigerian suspect names for realistic demo data
+// Nigerian Hausa/Muslim names for realistic demo data
 const suspectNames = [
-	"Emeka Okafor", "Fatima Ibrahim", "Kemi Adebayo", "Chinedu Okoro", "Aisha Mohammed",
-	"Taiwo Adeyemi", "Ngozi Eze", "Babatunde Oluwaseun", "Halima Usman", "Chioma Nwosu",
-	"Abdullahi Garba", "Funmi Adesanya", "Ikechukwu Anyanwu", "Zainab Aliyu", "Segun Ogundipe",
-	"Blessing Okwu", "Musa Ibrahim", "Adunni Fagbemi", "Chukwuma Okoye", "Amina Hassan"
+	"Abdullahi Garba", "Fatima Ibrahim", "Musa Aliyu", "Aisha Mohammed", "Usman Bello",
+	"Zainab Hassan", "Ibrahim Sani", "Khadija Yusuf", "Halima Umar", "Salisu Dauda",
+	"Amina Zakari", "Sulaiman Ahmad", "Hafsat Musa", "Umar Abdullahi", "Safiya Baba",
+	"Nasir Suleiman", "Maryam Adamu", "Auwal Musa", "Hauwa Garba", "Ismail Yunusa"
 ];
 
 // Function to get random image from public folder (000001.jpg to 000020.png)
@@ -25,9 +26,14 @@ function getRandomFaceImage(): string {
 }
 
 const locations = [
-	"Victoria Island", "Ikoyi", "Lekki Phase 1", "Ikeja GRA", "Yaba", "Surulere", "Apapa",
-	"Ilupeju", "Ojodu", "Maryland", "Gbagada", "Ketu", "Mile 2", "Festac Town", "Ajah",
-	"Banana Island", "Magodo", "Ogba", "Oshodi", "Mushin"
+	"Arewa-Dandi", "Argungu", "Augie", "Bagudo", "Birnin Kebbi", "Bunza", "Dandi",
+	"Fakai", "Gwandu", "Jega", "Kalgo", "Koko/Besse", "Maiyama", "Ngaski", "Sakaba",
+	"Shanga", "Suru", "Wasagu/Danko", "Yauri", "Zuru", "Nassarawa", "Ajingi", "Albasu",
+	"Bagwai", "Bebeji", "Bichi", "Bunkure", "Dala", "Dambatta", "Dawakin Kudu", "Dawakin Tofa",
+	"Doguwa", "Fagge", "Gabasawa", "Garko", "Garun Mallam", "Gaya", "Gezawa", "Gwale",
+	"Gwarzo", "Kabo", "Kano Municipal", "Karaye", "Kibiya", "Kiru", "Kumbotso", "Kunchi",
+	"Kura", "Madobi", "Makoda", "Minjibir", "Rano", "Rimin Gado", "Rogo", "Shanono",
+	"Sumaila", "Takai", "Tarauni", "Tofa", "Tsanyawa", "Tudun Wada", "Ungogo", "Warawa", "Wudil"
 ];
 
 const crimeTypes = [
@@ -37,9 +43,9 @@ const crimeTypes = [
 ];
 
 const officers = [
-	"Officer Adaeze Musa", "Officer John Okoye", "Inspector Sarah Akinola", "Sergeant Mike Okonkwo",
-	"Officer Fatima Bello", "Inspector David Okoro", "Officer Grace Nnenna", "Sergeant Ahmed Yusuf",
-	"Officer Chioma Eze", "Inspector Paul Adebayo"
+	"Officer Musa Garba", "Officer Fatima Bello", "Inspector Abubakar Sani", "Sergeant Umar Aliyu",
+	"Officer Zainab Ibrahim", "Inspector Suleiman Ahmad", "Officer Hauwa Musa", "Sergeant Ibrahim Yusuf",
+	"Officer Aisha Abdullahi", "Inspector Nasir Usman", "Sergeant Halima Zakari", "Officer Salisu Dauda"
 ];
 
 const caseDescriptions = [
@@ -103,6 +109,15 @@ export function ensureSeed() {
 			synced: Math.random() > 0.7, // Some cases are synced
 		}));
 		writeStore("cases", seeded);
+		
+		// Log case creation activities
+		seeded.forEach(caseRecord => {
+			logActivity("case_create", `Case ${caseRecord.id} created - ${caseRecord.crimeType}`, {
+				caseId: caseRecord.id,
+				crimeType: caseRecord.crimeType,
+				officer: caseRecord.officer
+			});
+		});
 	}
 
 	// Arrests - Generate 12 realistic arrests
@@ -119,6 +134,15 @@ export function ensureSeed() {
 			synced: Math.random() > 0.6,
 		}));
 		writeStore("arrests", seeded);
+		
+		// Log arrest creation activities
+		seeded.forEach(arrestRecord => {
+			logActivity("arrest_create", `Arrest ${arrestRecord.id} processed - ${arrestRecord.crime}`, {
+				arrestId: arrestRecord.id,
+				crime: arrestRecord.crime,
+				officer: arrestRecord.assignedOfficer
+			});
+		});
 	}
 
 	// Patrols - Generate 18 patrol logs
@@ -137,6 +161,15 @@ export function ensureSeed() {
 			};
 		});
 		writeStore("patrols", seeded);
+		
+		// Log patrol creation activities 
+		seeded.forEach(patrolRecord => {
+			logActivity("patrol_create", `Patrol log ${patrolRecord.id} created for ${patrolRecord.location}`, {
+				patrolId: patrolRecord.id,
+				location: patrolRecord.location,
+				officer: patrolRecord.officer
+			});
+		});
 	}
 
 	// Evidence - Generate evidence records for cases and arrests
@@ -178,7 +211,25 @@ export function ensureSeed() {
 		});
 		
 		writeStore("evidence", seeded);
+		
+		// Log evidence upload activities
+		seeded.forEach(evidenceRecord => {
+			logActivity("evidence_upload", `Evidence ${evidenceRecord.filename} uploaded for ${evidenceRecord.ownerType} ${evidenceRecord.ownerId}`, {
+				evidenceId: evidenceRecord.id,
+				filename: evidenceRecord.filename,
+				ownerType: evidenceRecord.ownerType,
+				ownerId: evidenceRecord.ownerId
+			});
+		});
 	}
+	
+	// Log system startup
+	logActivity("system_access", "System seed data generated", {
+		cases: cases?.length || 0,
+		arrests: arrests?.length || 0,
+		patrols: patrols?.length || 0,
+		evidence: evidence?.length || 0
+	});
 }
 
 // Function to clear all data and regenerate fresh sample data

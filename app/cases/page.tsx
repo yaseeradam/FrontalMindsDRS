@@ -15,7 +15,7 @@ export default function CasesPage() {
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [selectedCategory, setSelectedCategory] = useState<string>("all");
 	const [searchTerm, setSearchTerm] = useState("");
-	const [viewMode, setViewMode] = useState<"grid" | "category">("category");
+	const [viewMode, setViewMode] = useState<"grid" | "category">("grid");
 	
 	useEffect(() => {
 		ensureSeed();

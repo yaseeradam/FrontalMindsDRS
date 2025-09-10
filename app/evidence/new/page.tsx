@@ -12,6 +12,7 @@ import { ensureSeed } from "@/lib/seed";
 import { Upload, FileText, Image as ImageIcon, Video, Archive, Shield, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 export default function NewEvidencePage() {
 	const router = useRouter();
@@ -207,21 +208,20 @@ export default function NewEvidencePage() {
 								<Label htmlFor="owner-id" className="text-sm font-mono text-muted-foreground">
 									{ownerType.toUpperCase()} ID
 								</Label>
-								<Select value={ownerId} onValueChange={setOwnerId}>
-									<SelectTrigger className="font-mono mt-2">
-										<SelectValue placeholder={`Select ${ownerType}`} />
-									</SelectTrigger>
-									<SelectContent>
-										{availableOwners.map((owner) => (
-											<SelectItem key={owner.id} value={owner.id} className="font-mono">
-												{owner.id} - {ownerType === "case" 
-													? (owner as CaseRecord).crimeType 
-													: (owner as ArrestRecord).crime
-												}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+								<SearchableSelect
+									value={ownerId}
+									onValueChange={setOwnerId}
+									placeholder={`Search ${ownerType} ID...`}
+									emptyText={`No ${ownerType}s found`}
+									className="mt-2"
+									items={availableOwners.map(owner => ({
+										value: owner.id,
+										label: owner.id,
+										subtitle: ownerType === "case" 
+											? (owner as CaseRecord).crimeType 
+											: (owner as ArrestRecord).crime
+									}))}
+								/>
 							</div>
 
 							<div>

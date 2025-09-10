@@ -4,15 +4,17 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { CaseRecord, readStore, writeStore } from "@/lib/storage";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Printer } from "lucide-react";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import Link from "next/link";
 
 export default function CaseDetailPage() {
-	const params = useParams<{ id: string }>();
+	const params = useParams<{id: string}>();
 	const router = useRouter();
 	const [record, setRecord] = useState<CaseRecord | null>(null);
+	const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; crimeType: string }>({ open: false, id: "", crimeType: "" });
 
 	useEffect(() => {
 		const all = readStore("cases", [] as CaseRecord[]);
@@ -20,10 +22,16 @@ export default function CaseDetailPage() {
 		setRecord(found ?? null);
 	}, [params.id]);
 
-	function remove() {
+	function openDeleteConfirm() {
+		if (!record) return;
+		setDeleteConfirm({ open: true, id: record.id, crimeType: record.crimeType });
+	}
+
+	function confirmDelete() {
 		if (!record) return;
 		const all = readStore("cases", [] as CaseRecord[]);
 		writeStore("cases", all.filter((c) => c.id !== record.id));
+		setDeleteConfirm({ open: false, id: "", crimeType: "" });
 		router.push("/cases");
 	}
 
@@ -52,37 +60,40 @@ export default function CaseDetailPage() {
 						padding-bottom: 20px;
 						margin-bottom: 30px;
 						position: relative;
+						background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+						color: white !important;
+						padding: 30px 40px;
+						margin: -40px -40px 30px -40px;
 					}
-					.case-image-section {
-						position: relative;
+					.case-section {
+						display: grid;
+						grid-template-columns: 1fr 240px;
+						gap: 30px;
 						margin-bottom: 30px;
-						display: flex;
-						justify-content: flex-end;
 					}
 					.case-image {
-						width: 120px;
-						height: 120px;
+						width: 240px;
+						height: 240px;
 						object-fit: cover;
 						border: 2px solid #3b82f6;
 						border-radius: 8px;
 						box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 					}
 					.title {
-						font-size: 24px;
+						font-size: 28px;
 						font-weight: bold;
-						color: #3b82f6;
+						color: white !important;
 						margin: 0;
 					}
 					.subtitle {
-						font-size: 12px;
-						color: #666;
+						font-size: 14px;
+						color: #e2e8f0 !important;
 						margin: 5px 0 0 0;
 					}
 					.case-info {
 						display: grid;
 						grid-template-columns: 1fr 1fr;
 						gap: 20px;
-						margin-bottom: 30px;
 					}
 					.info-item {
 						padding: 10px;
@@ -125,6 +136,10 @@ export default function CaseDetailPage() {
 					@media print {
 						body { margin: 0; }
 						@page { margin: 2cm; }
+						* { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
+						.header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important; color: white !important; }
+						.title { color: white !important; }
+						.subtitle { color: #e2e8f0 !important; }
 					}
 				</style>
 			</head>
@@ -133,9 +148,8 @@ export default function CaseDetailPage() {
 					<h1 class="title">FRONTALMINDS POLICE DRS</h1>
 					<p class="subtitle">Digital Records System - Case Report</p>
 				</div>
-				${record.photoBase64 ? `<div class="case-image-section"><img src="${record.photoBase64}" alt="Case Evidence" class="case-image" /></div>` : ''}
-				
-				<div class="case-info">
+				<div class="case-section">
+					<div class="case-info">
 					<div class="info-item">
 						<div class="info-label">Case ID</div>
 						<div class="info-value">${record.id}</div>
@@ -160,6 +174,8 @@ export default function CaseDetailPage() {
 						<div class="info-label">Date & Time</div>
 						<div class="info-value">${new Date(record.date).toLocaleString()}</div>
 					</div>
+					</div>
+					${record.photoBase64 ? `<div class="photo-section"><img src="${record.photoBase64}" alt="Case Evidence" class="case-image" /></div>` : '<div class="photo-section"></div>'}
 				</div>
 				
 				<div class="description">
@@ -200,7 +216,7 @@ export default function CaseDetailPage() {
 					</Button>
 					<Button variant="secondary" asChild><Link href={`/cases/edit?id=${encodeURIComponent(record.id)}`}>Edit</Link></Button>
 					<Button variant="outline">Transfer Case</Button>
-					<Button variant="destructive" onClick={remove}>Delete</Button>
+					<Button variant="destructive" onClick={openDeleteConfirm}>Delete</Button>
 				</div>
 			</div>
 			<div className="grid md:grid-cols-3 gap-6">
@@ -231,6 +247,17 @@ export default function CaseDetailPage() {
 					</div>
 				</div>
 			</div>
+
+			<ConfirmationDialog
+				open={deleteConfirm.open}
+				onOpenChange={(open) => setDeleteConfirm(prev => ({ ...prev, open }))}
+				title="Delete Case"
+				description={`Are you sure you want to delete the case "${deleteConfirm.crimeType}"? This action cannot be undone.`}
+				confirmText="Delete"
+				cancelText="Cancel"
+				variant="destructive"
+				onConfirm={confirmDelete}
+			/>
 		</div>
 	);
 }

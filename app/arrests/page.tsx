@@ -3,12 +3,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { useButtonLoading } from "@/hooks/use-button-loading";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { ArrestRecord, readStore, writeStore } from "@/lib/storage";
 import { ensureSeed } from "@/lib/seed";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Printer, Eye } from "lucide-react";
 
 export default function ArrestsPage() {
@@ -16,6 +19,8 @@ export default function ArrestsPage() {
 	const [preview, setPreview] = useState<string | undefined>();
 	const [status, setStatus] = useState<string>("All");
 	const [q, setQ] = useState("");
+	const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
+	const { withLoading } = useButtonLoading();
 
 	useEffect(() => {
 		ensureSeed();
@@ -30,10 +35,15 @@ export default function ArrestsPage() {
 		});
 	}, [arrests, status, q]);
 
-	function remove(id: string) {
-		const next = arrests.filter((a) => a.id !== id);
+	function openDeleteConfirm(id: string, name: string) {
+		setDeleteConfirm({ open: true, id, name });
+	}
+
+	function confirmDelete() {
+		const next = arrests.filter((a) => a.id !== deleteConfirm.id);
 		setArrests(next);
 		writeStore("arrests", next);
+		setDeleteConfirm({ open: false, id: "", name: "" });
 	}
 
 	// Print function for arrest records
@@ -56,9 +66,9 @@ export default function ArrestsPage() {
 					.agency-subtitle { font-size: 16px; margin: 0 0 8px 0; color: #cbd5e1; }
 					.report-type { font-size: 14px; font-weight: bold; color: #fbbf24; margin: 0; }
 					.report-meta { position: absolute; top: 30px; right: 40px; text-align: right; font-size: 11px; color: #94a3b8; }
-					.suspect-photo-section { position: relative; margin-bottom: 30px; display: flex; justify-content: flex-end; }
-					.suspect-photo { width: 120px; height: 120px; object-fit: cover; border: 3px solid #ef4444; border-radius: 8px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
-					.arrest-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+					.arrest-section { display: grid; grid-template-columns: 1fr 240px; gap: 30px; margin-bottom: 30px; }
+					.suspect-photo { width: 240px; height: 240px; object-fit: cover; border: 3px solid #ef4444; border-radius: 8px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+					.arrest-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 					.info-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
 					.info-label { font-weight: bold; color: #475569; font-size: 11px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
 					.info-value { color: #1e293b; font-size: 14px; font-weight: 500; }
@@ -74,6 +84,12 @@ export default function ArrestsPage() {
 						body { margin: 0; } 
 						@page { margin: 1.5cm; size: A4; }
 						.letterhead { margin: -20px -20px 20px -20px; }
+						* { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
+						.letterhead { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; color: white !important; }
+						.agency-name { color: #ef4444 !important; }
+						.agency-subtitle { color: #cbd5e1 !important; }
+						.report-type { color: #fbbf24 !important; }
+						.classification-stamp { background: #dc2626 !important; color: white !important; }
 					}
 				</style>
 			</head>
@@ -92,10 +108,8 @@ export default function ArrestsPage() {
 						<div><strong>Time:</strong> ${new Date().toLocaleTimeString()}</div>
 					</div>
 				</div>
-				<div class="suspect-photo-section">
-					<img src="${arrest.photoBase64}" alt="Suspect Photo" class="suspect-photo" />
-				</div>
-				<div class="arrest-info">
+				<div class="arrest-section">
+					<div class="arrest-info">
 					<div class="info-item">
 						<div class="info-label">Arrest ID</div>
 						<div class="info-value">${arrest.id}</div>
@@ -127,6 +141,10 @@ export default function ArrestsPage() {
 					<div class="info-item">
 						<div class="info-label">Classification</div>
 						<div class="info-value">CUSTODY RECORD</div>
+					</div>
+					</div>
+					<div class="photo-section">
+						<img src="${arrest.photoBase64}" alt="Suspect Photo" class="suspect-photo" />
 					</div>
 				</div>
 				<div class="custody-details">
@@ -352,18 +370,27 @@ export default function ArrestsPage() {
 												VIEW
 											</Link>
 										</Button>
-										<Button 
+										<LoadingButton 
 											size="sm" 
 											variant="outline" 
-											onClick={() => printArrest(a)}
+											onClick={withLoading(() => printArrest(a), 2000)}
 											className="border-gray-300 text-gray-700 hover:bg-gray-100 font-mono text-xs px-3"
+											loadingText="PRINTING..."
+											showLoadingSpinner={false}
 										>
 											<Printer className="h-3 w-3 mr-1" />
 											PRINT
-										</Button>
-										<Button size="sm" variant="destructive" onClick={() => remove(a.id)} className="px-3 font-mono text-xs">
+										</LoadingButton>
+										<LoadingButton 
+											size="sm" 
+											variant="destructive" 
+											onClick={withLoading(() => openDeleteConfirm(a.id, a.suspectName), 800)} 
+											className="px-3 font-mono text-xs"
+											loadingText="DEL"
+											showLoadingSpinner={false}
+										>
 											DEL
-										</Button>
+										</LoadingButton>
 									</div>
 								</div>
 							</div>
@@ -377,6 +404,17 @@ export default function ArrestsPage() {
 					{preview ? <Image src={preview} alt="Preview" width={500} height={300} className="w-full rounded" /> : null}
 				</DialogContent>
 			</Dialog>
+			
+			<ConfirmationDialog
+				open={deleteConfirm.open}
+				onOpenChange={(open) => setDeleteConfirm(prev => ({ ...prev, open }))}
+				title="Delete Arrest Record"
+				description={`Are you sure you want to delete the arrest record for "${deleteConfirm.name}"? This action cannot be undone.`}
+				confirmText="Delete"
+				cancelText="Cancel"
+				variant="destructive"
+				onConfirm={confirmDelete}
+			/>
 		</div>
 	);
 }
