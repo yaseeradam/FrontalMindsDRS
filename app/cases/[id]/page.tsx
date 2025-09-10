@@ -53,10 +53,13 @@ export default function CaseDetailPage() {
 						margin-bottom: 30px;
 						position: relative;
 					}
+					.case-image-section {
+						position: relative;
+						margin-bottom: 30px;
+						display: flex;
+						justify-content: flex-end;
+					}
 					.case-image {
-						position: absolute;
-						top: 0;
-						right: 0;
 						width: 120px;
 						height: 120px;
 						object-fit: cover;
@@ -69,13 +72,11 @@ export default function CaseDetailPage() {
 						font-weight: bold;
 						color: #3b82f6;
 						margin: 0;
-						max-width: calc(100% - 140px);
 					}
 					.subtitle {
 						font-size: 12px;
 						color: #666;
 						margin: 5px 0 0 0;
-						max-width: calc(100% - 140px);
 					}
 					.case-info {
 						display: grid;
@@ -129,10 +130,10 @@ export default function CaseDetailPage() {
 			</head>
 			<body>
 				<div class="header">
-					${record.photoBase64 ? `<img src="${record.photoBase64}" alt="Case Evidence" class="case-image" />` : ''}
 					<h1 class="title">FRONTALMINDS POLICE DRS</h1>
 					<p class="subtitle">Digital Records System - Case Report</p>
 				</div>
+				${record.photoBase64 ? `<div class="case-image-section"><img src="${record.photoBase64}" alt="Case Evidence" class="case-image" /></div>` : ''}
 				
 				<div class="case-info">
 					<div class="info-item">
