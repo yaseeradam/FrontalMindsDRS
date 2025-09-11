@@ -9,6 +9,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Filter, Search, FolderOpen, Printer } from "lucide-react";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { LoadingButton } from "@/components/ui/loading-button";
 
 export default function CasesPage() {
 	const [cases, setCases] = useState<CaseRecord[]>([]);
@@ -16,6 +18,7 @@ export default function CasesPage() {
 	const [selectedCategory, setSelectedCategory] = useState<string>("all");
 	const [searchTerm, setSearchTerm] = useState("");
 	const [viewMode, setViewMode] = useState<"grid" | "category">("grid");
+	const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
 	
 	useEffect(() => {
 		ensureSeed();
@@ -44,21 +47,26 @@ export default function CasesPage() {
 		return groups;
 	}, {} as Record<string, CaseRecord[]>);
 
-	async function remove(id: string) {
+	function openDeleteConfirm(id: string, name: string) {
+		setDeleteConfirm({ open: true, id, name });
+	}
+
+	async function confirmDelete() {
 		if (deletingId) return;
 		
-		setDeletingId(id);
+		setDeletingId(deleteConfirm.id);
 		try {
 			// Simulate API delay
 			await new Promise(resolve => setTimeout(resolve, 1000));
 			
-			const next = cases.filter((c) => c.id !== id);
+			const next = cases.filter((c) => c.id !== deleteConfirm.id);
 			setCases(next);
 			writeStore("cases", next);
 		} catch (error) {
 			// Handle error if needed
 		} finally {
 			setDeletingId(null);
+			setDeleteConfirm({ open: false, id: "", name: "" });
 		}
 	}
 
@@ -190,8 +198,9 @@ export default function CasesPage() {
 	};
 
 	return (
-		<div className="space-y-6">
-			<div className="bg-card border border-border rounded-xl p-6">
+		<>
+			<div className="space-y-6">
+				<div className="bg-card border border-border rounded-xl p-6">
 				<div className="flex items-center justify-between mb-4">
 					<div>
 						<h1 className="text-2xl font-bold tracking-wider text-primary font-mono">CASE FILES DATABASE</h1>
@@ -259,54 +268,72 @@ export default function CasesPage() {
 						{filteredCases.length} of {cases.length} cases
 					</div>
 				</div>
+				</div>
+
+				{cases.length === 0 ? (
+					<div className="text-center py-16 bg-card border border-border rounded-xl">
+						<div className="text-lg font-medium mb-2 font-mono">NO CASE FILES FOUND</div>
+						<div className="text-sm text-muted-foreground font-mono">CREATE A NEW CASE TO GET STARTED</div>
+						<div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground font-mono">
+							<div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></div>
+							SYSTEM READY
+						</div>
+					</div>
+				) : filteredCases.length === 0 ? (
+					<div className="text-center py-16 bg-card border border-border rounded-xl">
+						<div className="text-lg font-medium mb-2 font-mono">NO MATCHING CASES FOUND</div>
+						<div className="text-sm text-muted-foreground font-mono">Try adjusting your search or filter criteria</div>
+					</div>
+				) : viewMode === "category" ? (
+					<div className="space-y-8">
+						{Object.entries(groupedCases)
+							.filter(([_, cases]) => cases.length > 0)
+							.map(([category, categoryCases]) => (
+								<div key={category} className="space-y-4">
+									<div className="flex items-center gap-3">
+										<div className="h-8 w-1 bg-primary rounded"></div>
+										<h2 className="text-xl font-bold font-mono text-primary">
+											{category.toUpperCase()} CASES
+										</h2>
+										<Badge variant="secondary" className="font-mono">
+											{categoryCases.length} case{categoryCases.length !== 1 ? 's' : ''}
+										</Badge>
+									</div>
+									<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+										{categoryCases.map((c, index) => (
+											<CaseCard key={c.id} case={c} index={index} onRemove={(id, name) => openDeleteConfirm(id, name)} isDeleting={deletingId === c.id} onPrint={printCase} />
+										))}
+									</div>
+								</div>
+							))
+						}
+					</div>
+				) : (
+					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+					{filteredCases.map((c, index) => (
+						<CaseCard 
+							key={c.id} 
+							case={c} 
+							index={index} 
+							onRemove={(id, name) => openDeleteConfirm(id, name)} 
+							isDeleting={deletingId === c.id} 
+							onPrint={printCase} 
+						/>
+					))}
+					</div>
+				)}
 			</div>
 
-			{cases.length === 0 ? (
-				<div className="text-center py-16 bg-card border border-border rounded-xl">
-					<div className="text-lg font-medium mb-2 font-mono">NO CASE FILES FOUND</div>
-					<div className="text-sm text-muted-foreground font-mono">CREATE A NEW CASE TO GET STARTED</div>
-					<div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground font-mono">
-						<div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></div>
-						SYSTEM READY
-					</div>
-				</div>
-			) : filteredCases.length === 0 ? (
-				<div className="text-center py-16 bg-card border border-border rounded-xl">
-					<div className="text-lg font-medium mb-2 font-mono">NO MATCHING CASES FOUND</div>
-					<div className="text-sm text-muted-foreground font-mono">Try adjusting your search or filter criteria</div>
-				</div>
-			) : viewMode === "category" ? (
-				<div className="space-y-8">
-					{Object.entries(groupedCases)
-						.filter(([_, cases]) => cases.length > 0)
-						.map(([category, categoryCases]) => (
-							<div key={category} className="space-y-4">
-								<div className="flex items-center gap-3">
-									<div className="h-8 w-1 bg-primary rounded"></div>
-									<h2 className="text-xl font-bold font-mono text-primary">
-										{category.toUpperCase()} CASES
-									</h2>
-									<Badge variant="secondary" className="font-mono">
-										{categoryCases.length} case{categoryCases.length !== 1 ? 's' : ''}
-									</Badge>
-								</div>
-								<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-					{categoryCases.map((c, index) => (
-						<CaseCard key={c.id} case={c} index={index} onRemove={remove} isDeleting={deletingId === c.id} onPrint={printCase} />
-					))}
-								</div>
-							</div>
-						))
-					}
-				</div>
-			) : (
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-				{filteredCases.map((c, index) => (
-					<CaseCard key={c.id} case={c} index={index} onRemove={remove} isDeleting={deletingId === c.id} onPrint={printCase} />
-				))}
-				</div>
-			)}
-		</div>
+			<ConfirmationDialog
+				open={deleteConfirm.open}
+				onOpenChange={(open) => setDeleteConfirm({ ...deleteConfirm, open })}
+				title="Delete Case"
+				description={`Are you sure you want to delete the case for ${deleteConfirm.name}? This action cannot be undone.`}
+				confirmText="Delete"
+				variant="destructive"
+				onConfirm={confirmDelete}
+			/>
+		</>
 	);
 }
 
@@ -320,7 +347,7 @@ function CaseCard({
 }: { 
 	case: CaseRecord; 
 	index: number; 
-	onRemove: (id: string) => void; 
+	onRemove: (id: string, name: string) => void; 
 	isDeleting: boolean;
 	onPrint: (caseRecord: CaseRecord) => void; 
 }) {
@@ -424,16 +451,15 @@ function CaseCard({
 						<Printer className="h-3 w-3 mr-1" />
 						PRINT
 					</Button>
-					<Button 
+					<LoadingButton 
 						size="sm" 
 						variant="destructive" 
-						onClick={() => onRemove(c.id)}
-						disabled={isDeleting}
+						onClick={() => onRemove(c.id, c.crimeType)}
+						isLoading={isDeleting}
 						className="px-3 font-mono text-xs"
 					>
-						{isDeleting && <Spinner size="sm" />}
-						{isDeleting ? "..." : "DEL"}
-					</Button>
+						DEL
+					</LoadingButton>
 				</div>
 			</div>
 		</div>

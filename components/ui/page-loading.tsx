@@ -9,6 +9,7 @@ interface PageLoadingProps {
 	className?: string;
 }
 
+
 export function PageLoading({ 
 	text = "Loading...", 
 	className 
@@ -36,19 +37,20 @@ export function GlobalLoadingSpinner() {
 	return <PageLoading text="Processing..." />;
 }
 
-// Legacy hook for backward compatibility
+// Hook to detect page navigation and show loading spinner
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 export function usePageLoading() {
 	const [loading, setLoading] = useState(false);
 	const pathname = usePathname();
+	const searchParams = useSearchParams();
 
 	useEffect(() => {
-		// Only show loading on actual navigation, not initial load
-		const timer = setTimeout(() => setLoading(false), 300);
+		setLoading(true);
+		const timer = setTimeout(() => setLoading(false), 800);
 		return () => clearTimeout(timer);
-	}, [pathname]);
+	}, [pathname, searchParams]);
 
 	const showLoading = (duration = 1000) => {
 		setLoading(true);

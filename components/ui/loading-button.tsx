@@ -1,14 +1,17 @@
 "use client";
 
 import React, { forwardRef } from 'react';
-import { Button, ButtonProps } from './button';
+import { Button, buttonVariants } from './button';
 import { useLoading } from '@/contexts/loading-context';
 import { Loader2 } from 'lucide-react';
+import { VariantProps } from 'class-variance-authority';
 
-export interface LoadingButtonProps extends ButtonProps {
+export interface LoadingButtonProps extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
   loadingDuration?: number;
   showLoadingSpinner?: boolean;
   loadingText?: string;
+  children?: React.ReactNode;
+  asChild?: boolean;
 }
 
 export const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps>(
