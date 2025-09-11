@@ -81,27 +81,36 @@ export default function CasesPage() {
 			<head>
 				<title>Case Report - ${caseRecord.id}</title>
 				<style>
-					body { font-family: 'Arial', sans-serif; margin: 20px; line-height: 1.4; color: #333; }
-					.letterhead { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 30px 40px; margin: -20px -20px 30px -20px; position: relative; }
-					.letterhead::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
-					.agency-logo { width: 60px; height: 60px; background: #3b82f6; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; float: left; margin-right: 20px; }
+					* { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; }
+					body { font-family: 'Arial', sans-serif; margin: 20px; line-height: 1.4; color: #333 !important; -webkit-print-color-adjust: exact !important; }
+					.letterhead { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; color: white !important; padding: 30px 40px; margin: -20px -20px 30px -20px; position: relative; -webkit-print-color-adjust: exact !important; }
+					.letterhead::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #3b82f6, #1d4ed8) !important; -webkit-print-color-adjust: exact !important; }
+					.agency-logo { width: 60px; height: 60px; background: #3b82f6 !important; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; float: left; margin-right: 20px; color: white !important; -webkit-print-color-adjust: exact !important; }
 					.agency-details { overflow: hidden; }
-					.agency-name { font-size: 28px; font-weight: bold; margin: 0 0 5px 0; color: #3b82f6; }
-					.agency-subtitle { font-size: 16px; margin: 0 0 8px 0; color: #cbd5e1; }
-					.report-type { font-size: 14px; font-weight: bold; color: #fbbf24; margin: 0; }
-					.report-meta { position: absolute; top: 30px; right: 40px; text-align: right; font-size: 11px; color: #94a3b8; }
+					.agency-name { font-size: 28px; font-weight: bold; margin: 0 0 5px 0; color: #3b82f6 !important; }
+					.agency-subtitle { font-size: 16px; margin: 0 0 8px 0; color: #cbd5e1 !important; }
+					.report-type { font-size: 14px; font-weight: bold; color: #fbbf24 !important; margin: 0; }
+					.report-meta { position: absolute; top: 30px; right: 40px; text-align: right; font-size: 11px; color: #94a3b8 !important; }
 					.case-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-					.info-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
-					.info-label { font-weight: bold; color: #475569; font-size: 11px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
-					.info-value { color: #1e293b; font-size: 14px; font-weight: 500; }
-					.description-section { margin: 30px 0; padding: 20px; border: 2px solid #3b82f6; border-radius: 8px; background: #eff6ff; }
+					.info-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc !important; -webkit-print-color-adjust: exact !important; }
+					.info-label { font-weight: bold; color: #475569 !important; font-size: 11px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+					.info-value { color: #1e293b !important; font-size: 14px; font-weight: 500; }
+					.description-section { margin: 30px 0; padding: 20px; border: 2px solid #3b82f6; border-radius: 8px; background: #eff6ff !important; -webkit-print-color-adjust: exact !important; }
 					.footer-section { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; }
-					.officer-details { background: #f1f5f9; padding: 15px 20px; border-radius: 8px; border-left: 4px solid #3b82f6; }
-					.classification-stamp { position: absolute; top: 10px; right: 10px; background: #059669; color: white; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; transform: rotate(15deg); }
+					.officer-details { background: #f1f5f9 !important; padding: 15px 20px; border-radius: 8px; border-left: 4px solid #3b82f6; -webkit-print-color-adjust: exact !important; }
+					.classification-stamp { position: absolute; top: 10px; right: 10px; background: #059669 !important; color: white !important; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; transform: rotate(15deg); -webkit-print-color-adjust: exact !important; }
 					@media print { 
-						body { margin: 0; } 
+						* { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; }
+						body { margin: 0; -webkit-print-color-adjust: exact !important; } 
 						@page { margin: 1.5cm; size: A4; }
-						.letterhead { margin: -20px -20px 20px -20px; }
+						.letterhead { margin: -20px -20px 20px -20px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; -webkit-print-color-adjust: exact !important; }
+						.letterhead::after { background: linear-gradient(90deg, #3b82f6, #1d4ed8) !important; -webkit-print-color-adjust: exact !important; }
+						.agency-logo { background: #3b82f6 !important; color: white !important; -webkit-print-color-adjust: exact !important; }
+						.info-item { background: #f8fafc !important; -webkit-print-color-adjust: exact !important; }
+						.description-section { background: #eff6ff !important; -webkit-print-color-adjust: exact !important; }
+						.officer-details { background: #f1f5f9 !important; -webkit-print-color-adjust: exact !important; }
+						.classification-stamp { background: #059669 !important; color: white !important; -webkit-print-color-adjust: exact !important; }
+						.footer-info { background: #f8fafc !important; -webkit-print-color-adjust: exact !important; }
 					}
 				</style>
 			</head>
@@ -157,7 +166,7 @@ export default function CasesPage() {
 				${caseRecord.description ? `
 				<div class="description-section">
 					<div class="info-label" style="font-size: 14px; margin-bottom: 15px;">CASE DESCRIPTION & NARRATIVE</div>
-					<p style="line-height: 1.6; color: #1f2937;">${caseRecord.description}</p>
+					<p style="line-height: 1.6; color: #1f2937 !important;">${caseRecord.description}</p>
 				</div>
 				` : ''}
 				<div class="footer-section">
@@ -178,10 +187,10 @@ export default function CasesPage() {
 							</div>
 						</div>
 					</div>
-					<div style="margin-top: 30px; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 11px; color: #64748b; text-align: center;">
-						<div style="font-weight: bold; color: #1e293b; margin-bottom: 5px;">NIGERIA POLICE FORCE - DIGITAL RECORDS SYSTEM</div>
-						<div>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()} | Document Classification: CASE FILE</div>
-						<div style="margin-top: 5px; font-style: italic;">This document contains confidential case information and is for official use only.</div>
+					<div class="footer-info" style="margin-top: 30px; padding: 15px; background: #f8fafc !important; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 11px; color: #64748b !important; text-align: center; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;">
+						<div style="font-weight: bold; color: #1e293b !important; margin-bottom: 5px;">NIGERIA POLICE FORCE - DIGITAL RECORDS SYSTEM</div>
+						<div style="color: #64748b !important;">Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()} | Document Classification: CASE FILE</div>
+						<div style="margin-top: 5px; font-style: italic; color: #64748b !important;">This document contains confidential case information and is for official use only.</div>
 					</div>
 				</div>
 			</body>
