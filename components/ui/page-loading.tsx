@@ -39,18 +39,18 @@ export function GlobalLoadingSpinner() {
 
 // Hook to detect page navigation and show loading spinner
 import { useState, useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
+// Safe client-only hook that doesn't use useSearchParams to avoid SSR issues
 export function usePageLoading() {
 	const [loading, setLoading] = useState(false);
 	const pathname = usePathname();
-	const searchParams = useSearchParams();
 
 	useEffect(() => {
 		setLoading(true);
 		const timer = setTimeout(() => setLoading(false), 800);
 		return () => clearTimeout(timer);
-	}, [pathname, searchParams]);
+	}, [pathname]); // Only depend on pathname, not searchParams
 
 	const showLoading = (duration = 1000) => {
 		setLoading(true);
