@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ArrestRecord, readStore } from "@/lib/storage";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Printer, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export default function ArrestEditPage() {
+function ArrestEditPageContent() {
 	const searchParams = useSearchParams();
 	const router = useRouter();
 	const [record, setRecord] = useState<ArrestRecord | null>(null);
@@ -302,5 +302,13 @@ export default function ArrestEditPage() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+export default function ArrestEditPage() {
+	return (
+		<Suspense fallback={<div className="text-muted-foreground">Loading arrest record...</div>}>
+			<ArrestEditPageContent />
+		</Suspense>
 	);
 }
