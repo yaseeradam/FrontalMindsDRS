@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Filter, Search, FolderOpen, Printer } from "lucide-react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { LoadingButton } from "@/components/ui/loading-button";
 
 export default function CasesPage() {
 	const [cases, setCases] = useState<CaseRecord[]>([]);
@@ -460,15 +459,22 @@ function CaseCard({
 						<Printer className="h-3 w-3 mr-1" />
 						PRINT
 					</Button>
-					<LoadingButton 
+					<Button 
 						size="sm" 
 						variant="destructive" 
 						onClick={() => onRemove(c.id, c.crimeType)}
-						isLoading={isDeleting}
+						disabled={isDeleting}
 						className="px-3 font-mono text-xs"
 					>
-						DEL
-					</LoadingButton>
+						{isDeleting ? (
+							<>
+								<Spinner className="mr-1 h-3 w-3" />
+								DEL
+							</>
+						) : (
+							"DEL"
+						)}
+					</Button>
 				</div>
 			</div>
 		</div>
