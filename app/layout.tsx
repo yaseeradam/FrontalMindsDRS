@@ -7,6 +7,7 @@ import { LoadingWrapper } from "@/components/layout/loading-wrapper";
 import { LoadingProvider } from "@/contexts/loading-context";
 import { GlobalLoadingSpinner } from "@/components/ui/page-loading";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/app/providers/AuthProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,13 +25,15 @@ export default function RootLayout({
       <body className={`${inter.variable} ${orbitron.variable} antialiased min-h-screen bg-background text-foreground`}>
         <ThemeProvider>
           <LanguageProvider>
-            <LoadingProvider>
-              <LoadingWrapper>
-                <AppShell>{children}</AppShell>
-                <GlobalLoadingSpinner />
-              </LoadingWrapper>
-              <Toaster richColors position="top-right" />
-            </LoadingProvider>
+            <AuthProvider>
+              <LoadingProvider>
+                <LoadingWrapper>
+                  <AppShell>{children}</AppShell>
+                  <GlobalLoadingSpinner />
+                </LoadingWrapper>
+                <Toaster richColors position="top-right" />
+              </LoadingProvider>
+            </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

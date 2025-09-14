@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,7 @@ export default function ActivityPage() {
 	const [logs, setLogs] = useState<ActivityLog[]>([]);
 	const [stats, setStats] = useState(getActivityStats());
 	const [filters, setFilters] = useState({
-		type: "" as ActivityType | "",
+		type: "all" as ActivityType | "all",
 		user: "",
 		startDate: "",
 		endDate: "",
@@ -39,12 +39,15 @@ export default function ActivityPage() {
 	});
 	const [loading, setLoading] = useState(false);
 	const [clearLogsConfirm, setClearLogsConfirm] = useState(false);
+	const [autoRefresh, setAutoRefresh] = useState(true);
+	const [lastUpdateTime, setLastUpdateTime] = useState(new Date().toISOString());
+	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-	const loadLogs = () => {
-		setLoading(true);
+	const loadLogs = (silent = false) => {
+		if (!silent) setLoading(true);
 		try {
 			const filteredLogs = getActivityLogs({
-				type: filters.type || undefined,
+				type: filters.type === "all" ? undefined : filters.type,
 				user: filters.user || undefined,
 				startDate: filters.startDate || undefined,
 				endDate: filters.endDate || undefined,
@@ -52,14 +55,35 @@ export default function ActivityPage() {
 			});
 			setLogs(filteredLogs);
 			setStats(getActivityStats());
+			setLastUpdateTime(new Date().toISOString());
 		} finally {
-			setLoading(false);
+			if (!silent) setLoading(false);
 		}
 	};
 
 	useEffect(() => {
 		loadLogs();
 	}, [filters]);
+
+	// Auto-refresh effect
+	useEffect(() => {
+		if (autoRefresh) {
+			intervalRef.current = setInterval(() => {
+				loadLogs(true); // Silent refresh
+			}, 5000); // Refresh every 5 seconds
+		} else {
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
+				intervalRef.current = null;
+			}
+		}
+
+		return () => {
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
+			}
+		};
+	}, [autoRefresh]);
 
 	const openClearLogsConfirm = () => {
 		setClearLogsConfirm(true);
@@ -114,14 +138,29 @@ export default function ActivityPage() {
 						</p>
 					</div>
 					<div className="flex items-center gap-4">
-						<div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
-							<div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-							AUDIT TRAIL ACTIVE
+						<div className="flex items-center gap-4">
+							<div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
+								<div className={`h-2 w-2 rounded-full ${autoRefresh ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+								{autoRefresh ? 'REAL-TIME ACTIVE' : 'MANUAL MODE'}
+							</div>
+							<div className="text-xs text-muted-foreground font-mono">
+								Last updated: {new Date(lastUpdateTime).toLocaleTimeString()}
+							</div>
 						</div>
-						<Button variant="outline" onClick={loadLogs} className="font-mono" disabled={loading}>
-							<RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-							REFRESH
-						</Button>
+						<div className="flex items-center gap-2">
+							<Button 
+								variant={autoRefresh ? "default" : "outline"} 
+								size="sm"
+								onClick={() => setAutoRefresh(!autoRefresh)} 
+								className="font-mono text-xs"
+							>
+								{autoRefresh ? 'LIVE' : 'AUTO'}
+							</Button>
+							<Button variant="outline" onClick={() => loadLogs()} className="font-mono text-xs" disabled={loading}>
+								<RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+								REFRESH
+							</Button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -182,14 +221,14 @@ export default function ActivityPage() {
 					<div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
 						<div>
 							<label className="text-xs font-mono text-muted-foreground">ACTIVITY TYPE</label>
-							<Select value={filters.type} onValueChange={(value: ActivityType) => 
+							<Select value={filters.type} onValueChange={(value: ActivityType | "all") => 
 								setFilters(prev => ({ ...prev, type: value }))
 							}>
 								<SelectTrigger className="font-mono text-xs">
 									<SelectValue placeholder="All Types" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="" className="font-mono">All Types</SelectItem>
+									<SelectItem value="all" className="font-mono">All Types</SelectItem>
 									{activityTypes.map(type => (
 										<SelectItem key={type} value={type} className="font-mono">
 											{getActivityIcon(type)} {formatActivityType(type)}

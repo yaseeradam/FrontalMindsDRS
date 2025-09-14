@@ -12,9 +12,13 @@ import { ensureSeed } from "@/lib/seed";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { Printer, Eye } from "lucide-react";
+import { Printer, Eye, Lock, Shield } from "lucide-react";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { useRoleProtection } from "@/hooks/useRoleProtection";
 
 export default function ArrestsPage() {
+	const { user, hasAccess } = useRoleProtection(); // Require authentication
+	const { canDelete } = useAuth();
 	const [arrests, setArrests] = useState<ArrestRecord[]>([]);
 	const [preview, setPreview] = useState<string | undefined>();
 	const [status, setStatus] = useState<string>("All");
@@ -205,8 +209,45 @@ export default function ArrestsPage() {
 		}, 500);
 	};
 
+	// Show loading screen while checking authentication
+	if (!hasAccess) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-background">
+				<div className="flex items-center gap-3 text-muted-foreground">
+					<div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+					<span className="font-mono text-sm">LOADING ARREST RECORDS...</span>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-6">
+			{/* Role-based access indicator */}
+			<div className="bg-card border border-border rounded-xl p-4">
+				<div className="flex items-center justify-between">
+					<div className="flex items-center gap-3">
+						<Shield className="h-5 w-5 text-primary" />
+						<div>
+							<div className="text-sm font-mono font-semibold">
+								ACCESS LEVEL: {user?.role?.toUpperCase() || 'UNKNOWN'}
+							</div>
+							<div className="text-xs text-muted-foreground font-mono">
+								{canDelete() 
+									? 'Full permissions - View, Edit, Delete' 
+									: 'Limited permissions - View and Edit only'
+								}
+							</div>
+						</div>
+					</div>
+					{!canDelete() && (
+						<div className="flex items-center gap-2 text-xs font-mono text-amber-600 dark:text-amber-400">
+							<Lock className="h-3 w-3" />
+							RESTRICTED: Contact Chief or Admin to delete arrests
+						</div>
+					)}
+				</div>
+			</div>
 			<div className="bg-card border border-border rounded-xl p-6">
 				<div className="flex items-center justify-between">
 					<div>
@@ -381,16 +422,18 @@ export default function ArrestsPage() {
 											<Printer className="h-3 w-3 mr-1" />
 											PRINT
 										</LoadingButton>
-										<LoadingButton 
-											size="sm" 
-											variant="destructive" 
-											onClick={withLoading(() => openDeleteConfirm(a.id, a.suspectName), 800)} 
-											className="px-3 font-mono text-xs"
-											loadingText="DEL"
-											showLoadingSpinner={false}
-										>
-											DEL
-										</LoadingButton>
+										{canDelete() && (
+											<LoadingButton 
+												size="sm" 
+												variant="destructive" 
+												onClick={withLoading(() => openDeleteConfirm(a.id, a.suspectName), 800)} 
+												className="px-3 font-mono text-xs"
+												loadingText="DEL"
+												showLoadingSpinner={false}
+											>
+												DEL
+											</LoadingButton>
+										)}
 									</div>
 								</div>
 							</div>

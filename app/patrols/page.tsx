@@ -8,8 +8,13 @@ import { PatrolRecord, readStore, writeStore } from "@/lib/storage";
 import { ensureSeed } from "@/lib/seed";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { Lock, Shield } from "lucide-react";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { useRoleProtection } from "@/hooks/useRoleProtection";
 
 export default function PatrolsPage() {
+	const { user, hasAccess } = useRoleProtection(); // Require authentication
+	const { canDelete } = useAuth();
 	const [patrols, setPatrols] = useState<PatrolRecord[]>([]);
 	const [location, setLocation] = useState<string>("All");
 	const [q, setQ] = useState("");
@@ -44,8 +49,45 @@ export default function PatrolsPage() {
 		setDeleteConfirm({ open: false, id: "", location: "" });
 	}
 
+	// Show loading screen while checking authentication
+	if (!hasAccess) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-background">
+				<div className="flex items-center gap-3 text-muted-foreground">
+					<div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+					<span className="font-mono text-sm">LOADING PATROL LOGS...</span>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-6">
+			{/* Role-based access indicator */}
+			<div className="bg-card border border-border rounded-xl p-4">
+				<div className="flex items-center justify-between">
+					<div className="flex items-center gap-3">
+						<Shield className="h-5 w-5 text-primary" />
+						<div>
+							<div className="text-sm font-mono font-semibold">
+								ACCESS LEVEL: {user?.role?.toUpperCase() || 'UNKNOWN'}
+							</div>
+							<div className="text-xs text-muted-foreground font-mono">
+								{canDelete() 
+									? 'Full permissions - View, Edit, Delete' 
+									: 'Limited permissions - View and Edit only'
+								}
+							</div>
+						</div>
+					</div>
+					{!canDelete() && (
+						<div className="flex items-center gap-2 text-xs font-mono text-amber-600 dark:text-amber-400">
+							<Lock className="h-3 w-3" />
+							RESTRICTED: Contact Chief or Admin to delete patrols
+						</div>
+					)}
+				</div>
+			</div>
 			<div className="bg-card border border-border rounded-xl p-6">
 				<div className="flex items-center justify-between">
 					<div>
@@ -180,12 +222,14 @@ export default function PatrolsPage() {
 								{/* Actions */}
 								<div className="p-4 border-t border-border bg-muted/20">
 									<div className="flex gap-2">
-										<Button size="sm" variant="outline" asChild className="flex-1 border-green-300 text-green-700 hover:bg-green-500 hover:text-white dark:border-green-600 dark:text-green-400 font-mono text-xs">
-											<Link href={`/patrols/new`}>NEW PATROL</Link>
-										</Button>
+									<Button size="sm" variant="outline" asChild className="flex-1 border-green-300 text-green-700 hover:bg-green-500 hover:text-white dark:border-green-600 dark:text-green-400 font-mono text-xs">
+										<Link href={`/patrols/new`}>NEW PATROL</Link>
+									</Button>
+									{canDelete() && (
 										<Button size="sm" variant="destructive" onClick={() => openDeleteConfirm(p.id, p.location)} className="px-3 font-mono text-xs">
 											DELETE
 										</Button>
+									)}
 									</div>
 								</div>
 							</div>

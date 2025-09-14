@@ -3,15 +3,20 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { CaseRecord, readStore, writeStore } from "@/lib/storage";
+import { logActivity } from "@/lib/activity-log";
 import { ensureSeed } from "@/lib/seed";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Filter, Search, FolderOpen, Printer } from "lucide-react";
+import { Filter, Search, FolderOpen, Printer, Shield, Lock } from "lucide-react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { useRoleProtection } from "@/hooks/useRoleProtection";
 
 export default function CasesPage() {
+	const { user, hasAccess } = useRoleProtection(); // Require authentication
+	const { canDelete } = useAuth();
 	const [cases, setCases] = useState<CaseRecord[]>([]);
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -58,9 +63,27 @@ export default function CasesPage() {
 			// Simulate API delay
 			await new Promise(resolve => setTimeout(resolve, 1000));
 			
+			// Find the case being deleted for logging
+			const deletedCase = cases.find(c => c.id === deleteConfirm.id);
+			
 			const next = cases.filter((c) => c.id !== deleteConfirm.id);
 			setCases(next);
 			writeStore("cases", next);
+			
+			// Log the activity in real-time
+			if (deletedCase) {
+				logActivity(
+					"case_delete",
+					`Deleted case ${deletedCase.id} - ${deletedCase.crimeType} incident`,
+					{
+						caseId: deletedCase.id,
+						crimeType: deletedCase.crimeType,
+						officer: deletedCase.officer,
+						status: deletedCase.status,
+						suspect: deletedCase.suspect || "Unknown"
+					}
+				);
+			}
 		} catch (error) {
 			// Handle error if needed
 		} finally {
@@ -205,9 +228,47 @@ export default function CasesPage() {
 		}, 500);
 	};
 
+	// Show loading screen while checking authentication
+	if (!hasAccess) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-background">
+				<div className="flex items-center gap-3 text-muted-foreground">
+					<div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+					<span className="font-mono text-sm">LOADING CASE FILES...</span>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<>
 			<div className="space-y-6">
+				{/* Role-based access indicator */}
+				<div className="bg-card border border-border rounded-xl p-4">
+					<div className="flex items-center justify-between">
+						<div className="flex items-center gap-3">
+							<Shield className="h-5 w-5 text-primary" />
+							<div>
+								<div className="text-sm font-mono font-semibold">
+									ACCESS LEVEL: {user?.role?.toUpperCase() || 'UNKNOWN'}
+								</div>
+								<div className="text-xs text-muted-foreground font-mono">
+									{canDelete() 
+										? 'Full permissions - View, Edit, Delete' 
+										: 'Limited permissions - View and Edit only'
+									}
+								</div>
+							</div>
+						</div>
+						{!canDelete() && (
+							<div className="flex items-center gap-2 text-xs font-mono text-amber-600 dark:text-amber-400">
+								<Lock className="h-3 w-3" />
+								RESTRICTED: Contact Chief or Admin to delete cases
+							</div>
+						)}
+					</div>
+				</div>
+
 				<div className="bg-card border border-border rounded-xl p-6">
 				<div className="flex items-center justify-between mb-4">
 					<div>
@@ -309,7 +370,15 @@ export default function CasesPage() {
 									</div>
 									<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 										{categoryCases.map((c, index) => (
-											<CaseCard key={c.id} case={c} index={index} onRemove={(id, name) => openDeleteConfirm(id, name)} isDeleting={deletingId === c.id} onPrint={printCase} />
+											<CaseCard 
+												key={c.id} 
+												case={c} 
+												index={index} 
+												onRemove={(id, name) => openDeleteConfirm(id, name)} 
+												isDeleting={deletingId === c.id} 
+												onPrint={printCase}
+												canDelete={canDelete()}
+											/>
 										))}
 									</div>
 								</div>
@@ -325,7 +394,8 @@ export default function CasesPage() {
 							index={index} 
 							onRemove={(id, name) => openDeleteConfirm(id, name)} 
 							isDeleting={deletingId === c.id} 
-							onPrint={printCase} 
+							onPrint={printCase}
+							canDelete={canDelete()}
 						/>
 					))}
 					</div>
@@ -351,13 +421,15 @@ function CaseCard({
 	index, 
 	onRemove, 
 	isDeleting,
-	onPrint 
+	onPrint,
+	canDelete 
 }: { 
 	case: CaseRecord; 
 	index: number; 
 	onRemove: (id: string, name: string) => void; 
 	isDeleting: boolean;
-	onPrint: (caseRecord: CaseRecord) => void; 
+	onPrint: (caseRecord: CaseRecord) => void;
+	canDelete: boolean;
 }) {
 	const priorityLevel = 
 		c.status === "Open" || c.status === "Under Investigation" ? "HIGH" :
@@ -459,22 +531,24 @@ function CaseCard({
 						<Printer className="h-3 w-3 mr-1" />
 						PRINT
 					</Button>
-					<Button 
-						size="sm" 
-						variant="destructive" 
-						onClick={() => onRemove(c.id, c.crimeType)}
-						disabled={isDeleting}
-						className="px-3 font-mono text-xs"
-					>
-						{isDeleting ? (
-							<>
-								<Spinner className="mr-1 h-3 w-3" />
-								DEL
-							</>
-						) : (
-							"DEL"
-						)}
-					</Button>
+					{canDelete && (
+						<Button 
+							size="sm" 
+							variant="destructive" 
+							onClick={() => onRemove(c.id, c.crimeType)}
+							disabled={isDeleting}
+							className="px-3 font-mono text-xs"
+						>
+							{isDeleting ? (
+								<>
+									<Spinner className="mr-1 h-3 w-3" />
+									DEL
+								</>
+							) : (
+								"DEL"
+							)}
+						</Button>
+					)}
 				</div>
 			</div>
 		</div>

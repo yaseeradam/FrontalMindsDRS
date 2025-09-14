@@ -9,12 +9,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { readStore, type CaseRecord, type ArrestRecord, type PatrolRecord } from "@/lib/storage";
 import { ensureSeed } from "@/lib/seed";
+import { useRoleProtection } from "@/hooks/useRoleProtection";
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip as RTooltip, CartesianGrid } from "recharts";
 
 type CrimeSlice = { name: string; value: number };
 type ArrestPoint = { day: string; count: number };
 
 export default function DashboardPage() {
+	const { user, hasAccess } = useRoleProtection(); // Require authentication
 	const [counts, setCounts] = useState({ cases: 0, arrests: 0, patrols: 0, open: 0 });
     const [crimeData, setCrimeData] = useState<CrimeSlice[]>([]);
     const [arrestWeekly, setArrestWeekly] = useState<ArrestPoint[]>([]);
@@ -70,6 +72,18 @@ export default function DashboardPage() {
         setArrestWeekly(days);
         setIsLoading(false);
 	}, []);
+
+	// Show loading screen while checking authentication
+	if (!hasAccess) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-background">
+				<div className="flex items-center gap-3 text-muted-foreground">
+					<div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+					<span className="font-mono text-sm">LOADING DASHBOARD...</span>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="space-y-8">

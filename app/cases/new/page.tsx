@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { CaseRecord, generateId, readStore, writeStore, toBase64 } from "@/lib/storage";
+import { logActivity } from "@/lib/activity-log";
 import { toast } from "sonner";
 import { Shield, AlertTriangle, Clock, User, FileText, MapPin, Camera, Upload } from "lucide-react";
 import { ClientYear } from "@/components/ui/client-year";
@@ -73,6 +74,20 @@ export default function CaseNewPage() {
 			const existing = readStore("cases", [] as CaseRecord[]);
 			const updated = [next, ...existing];
 			writeStore("cases", updated);
+			
+			// Log the activity in real-time
+			logActivity(
+				"case_create",
+				`Created new case ${id} for ${finalCrimeType} incident`,
+				{
+					caseId: id,
+					crimeType: finalCrimeType,
+					officer: officer,
+					status: status,
+					suspect: suspect || "Unknown"
+				}
+			);
+			
 			toast.success(`Case ${id} created successfully`);
 			window.location.href = "/cases";
 		} catch (error) {

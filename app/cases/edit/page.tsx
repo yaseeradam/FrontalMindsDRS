@@ -11,6 +11,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { FormCard } from "@/components/form-card";
 import { Spinner } from "@/components/ui/spinner";
 import { CaseRecord, readStore, toBase64, writeStore } from "@/lib/storage";
+import { logActivity } from "@/lib/activity-log";
 import { toast } from "sonner";
 
 function CaseEditForm() {
@@ -92,6 +93,25 @@ function CaseEditForm() {
             };
             const next = all.map((c) => (c.id === record.id ? updated : c));
             writeStore("cases", next);
+            
+            // Log the activity in real-time
+            logActivity(
+                "case_update",
+                `Updated case ${record.id} - ${finalCrimeType} incident`,
+                {
+                    caseId: record.id,
+                    crimeType: finalCrimeType,
+                    officer: officer,
+                    status: status,
+                    changes: {
+                        oldStatus: record.status,
+                        newStatus: status,
+                        oldCrimeType: record.crimeType,
+                        newCrimeType: finalCrimeType
+                    }
+                }
+            );
+            
             toast.success("Case updated");
             router.push(`/cases/${encodeURIComponent(record.id)}`);
         } catch (error) {
