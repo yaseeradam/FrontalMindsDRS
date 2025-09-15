@@ -12,9 +12,11 @@ import { ensureSeed } from "@/lib/seed";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { PasswordConfirmationDialog } from "@/components/ui/password-confirmation-dialog";
 import { Printer, Eye, Lock, Shield } from "lucide-react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRoleProtection } from "@/hooks/useRoleProtection";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function ArrestsPage() {
 	const { user, hasAccess } = useRoleProtection(); // Require authentication
@@ -24,6 +26,7 @@ export default function ArrestsPage() {
 	const [status, setStatus] = useState<string>("All");
 	const [q, setQ] = useState("");
 	const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
+	const [passwordConfirm, setPasswordConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
 	const { withLoading } = useButtonLoading();
 
 	useEffect(() => {
@@ -40,7 +43,12 @@ export default function ArrestsPage() {
 	}, [arrests, status, q]);
 
 	function openDeleteConfirm(id: string, name: string) {
-		setDeleteConfirm({ open: true, id, name });
+		// Use password confirmation for Chief and Admin, regular confirmation for others
+		if (user?.role === 'Chief' || user?.role === 'Admin') {
+			setPasswordConfirm({ open: true, id, name });
+		} else {
+			setDeleteConfirm({ open: true, id, name });
+		}
 	}
 
 	function confirmDelete() {
@@ -48,6 +56,13 @@ export default function ArrestsPage() {
 		setArrests(next);
 		writeStore("arrests", next);
 		setDeleteConfirm({ open: false, id: "", name: "" });
+	}
+
+	function confirmPasswordDelete() {
+		const next = arrests.filter((a) => a.id !== passwordConfirm.id);
+		setArrests(next);
+		writeStore("arrests", next);
+		setPasswordConfirm({ open: false, id: "", name: "" });
 	}
 
 	// Print function for arrest records
@@ -223,6 +238,10 @@ export default function ArrestsPage() {
 
 	return (
 		<div className="space-y-6">
+			{/* Header with Back Button */}
+			<div className="flex items-center justify-between mb-4">
+				<BackButton href="/" label="Back to Dashboard" />
+			</div>
 			{/* Role-based access indicator */}
 			<div className="bg-card border border-border rounded-xl p-4">
 				<div className="flex items-center justify-between">
@@ -457,6 +476,15 @@ export default function ArrestsPage() {
 				cancelText="Cancel"
 				variant="destructive"
 				onConfirm={confirmDelete}
+			/>
+
+			<PasswordConfirmationDialog
+				open={passwordConfirm.open}
+				onOpenChange={(open) => setPasswordConfirm(prev => ({ ...prev, open }))}
+				title="Delete Arrest Record - Security Verification"
+				description={`You are about to permanently delete the arrest record for "${passwordConfirm.name}". This high-security action requires password verification. The custody data will be irreversibly removed from the system.`}
+				onConfirm={confirmPasswordDelete}
+				adminName={user?.name || "Unknown User"}
 			/>
 		</div>
 	);

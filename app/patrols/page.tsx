@@ -8,11 +8,95 @@ import { PatrolRecord, readStore, writeStore } from "@/lib/storage";
 import { ensureSeed } from "@/lib/seed";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { Lock, Shield } from "lucide-react";
+import { Lock, Shield, ArrowLeft, Printer } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
+import { PrintButton } from "@/components/ui/print-button";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRoleProtection } from "@/hooks/useRoleProtection";
 
 export default function PatrolsPage() {
+	// Print function for patrol records
+	const printPatrol = (patrol: PatrolRecord) => {
+		const printWindow = window.open('', '_blank');
+		if (!printWindow) return;
+		
+		const printHTML = `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<title>Patrol Report - ${patrol.id}</title>
+				<style>
+					body { font-family: 'Arial', sans-serif; margin: 20px; line-height: 1.4; color: #333; }
+					.letterhead { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 30px 40px; margin: -20px -20px 30px -20px; position: relative; }
+					.letterhead h1 { margin: 0; font-size: 28px; }
+					.letterhead p { margin: 5px 0 0 0; opacity: 0.8; }
+					.badge { position: absolute; top: 30px; right: 40px; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+					.section { margin-bottom: 20px; }
+					.section-title { font-size: 14px; text-transform: uppercase; margin-bottom: 5px; color: #666; }
+					.section-content { font-size: 16px; }
+					.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+					.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+					@media print { body { margin: 0; } }
+				</style>
+			</head>
+			<body>
+				<div class="letterhead">
+					<h1>NIGERIA POLICE FORCE</h1>
+					<p>PATROL REPORT - OFFICIAL DOCUMENT</p>
+					<div class="badge">👮</div>
+				</div>
+				
+				<div class="section">
+					<div class="section-title">PATROL ID</div>
+					<div class="section-content">${patrol.id}</div>
+				</div>
+				
+				<div class="grid">
+					<div class="section">
+						<div class="section-title">LOCATION</div>
+						<div class="section-content">${patrol.location}</div>
+					</div>
+					
+					<div class="section">
+						<div class="section-title">OFFICER</div>
+						<div class="section-content">${patrol.officer}</div>
+					</div>
+					
+					<div class="section">
+						<div class="section-title">DATE</div>
+						<div class="section-content">${patrol.date}</div>
+					</div>
+					
+					<div class="section">
+						<div class="section-title">TIME</div>
+						<div class="section-content">${patrol.time}</div>
+					</div>
+				</div>
+				
+				${patrol.notes ? `
+				<div class="section">
+					<div class="section-title">NOTES & OBSERVATIONS</div>
+					<div class="section-content">${patrol.notes.replace(/\n/g, '<br>')}</div>
+				</div>
+				` : ''}
+				
+				<div class="footer">
+					<p>FRONTALMINDS POLICE DRS v0.1.0 | GENERATED ${new Date().toLocaleString()}</p>
+					<p>This is an official document of the Nigeria Police Force. Unauthorized reproduction is prohibited.</p>
+				</div>
+			</body>
+			</html>
+		`;
+		
+		printWindow.document.open();
+		printWindow.document.write(printHTML);
+		printWindow.document.close();
+		
+		setTimeout(() => {
+			printWindow.print();
+		}, 500);
+	};
+
 	const { user, hasAccess } = useRoleProtection(); // Require authentication
 	const { canDelete } = useAuth();
 	const [patrols, setPatrols] = useState<PatrolRecord[]>([]);
@@ -90,9 +174,12 @@ export default function PatrolsPage() {
 			</div>
 			<div className="bg-card border border-border rounded-xl p-6">
 				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-2xl font-bold tracking-wider text-primary font-mono">PATROL LOGS</h1>
-						<p className="text-sm text-muted-foreground font-mono mt-1">FIELD OPERATIONS & SURVEILLANCE</p>
+					<div className="flex items-center gap-4">
+						<BackButton href="/dashboard" label="BACK TO DASHBOARD" />
+						<div>
+							<h1 className="text-2xl font-bold tracking-wider text-primary font-mono">PATROL LOGS</h1>
+							<p className="text-sm text-muted-foreground font-mono mt-1">FIELD OPERATIONS & SURVEILLANCE</p>
+						</div>
 					</div>
 					<div className="flex items-center gap-4">
 						<div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
@@ -222,9 +309,10 @@ export default function PatrolsPage() {
 								{/* Actions */}
 								<div className="p-4 border-t border-border bg-muted/20">
 									<div className="flex gap-2">
-									<Button size="sm" variant="outline" asChild className="flex-1 border-green-300 text-green-700 hover:bg-green-500 hover:text-white dark:border-green-600 dark:text-green-400 font-mono text-xs">
-										<Link href={`/patrols/new`}>NEW PATROL</Link>
-									</Button>
+									<PrintButton 
+										onClick={() => printPatrol(p)} 
+										label="PRINT PATROL"
+									/>
 									{canDelete() && (
 										<Button size="sm" variant="destructive" onClick={() => openDeleteConfirm(p.id, p.location)} className="px-3 font-mono text-xs">
 											DELETE

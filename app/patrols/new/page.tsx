@@ -9,9 +9,10 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { PatrolRecord, generateId, readStore, writeStore } from "@/lib/storage";
 import { logActivity } from "@/lib/activity-log";
 import { toast } from "sonner";
-import { Shield, MapPin, Clock, User, FileText, ArrowLeft } from "lucide-react";
+import { Shield, MapPin, Clock, User, FileText } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { BackButton } from "@/components/ui/back-button";
 
 const locations = [
 	"Arewa-Dandi", "Argungu", "Augie", "Bagudo", "Birnin Kebbi", "Bunza", "Dandi",
@@ -103,12 +104,7 @@ export default function PatrolNewPage() {
 			<div className="bg-card border border-border rounded-xl p-6">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-4">
-						<Button variant="outline" size="sm" asChild className="font-mono">
-							<Link href="/patrols">
-								<ArrowLeft className="h-4 w-4 mr-2" />
-								BACK TO PATROLS
-							</Link>
-						</Button>
+						<BackButton href="/patrols" label="BACK TO PATROLS" />
 						<div>
 							<h1 className="text-2xl font-bold tracking-wider text-primary font-mono">NEW PATROL LOG</h1>
 							<p className="text-sm text-muted-foreground font-mono mt-1">FIELD OPERATIONS DOCUMENTATION</p>

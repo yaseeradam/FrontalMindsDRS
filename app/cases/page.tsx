@@ -10,7 +10,9 @@ import { Spinner } from "@/components/ui/spinner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Filter, Search, FolderOpen, Printer, Shield, Lock } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { PasswordConfirmationDialog } from "@/components/ui/password-confirmation-dialog";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRoleProtection } from "@/hooks/useRoleProtection";
 
@@ -23,6 +25,7 @@ export default function CasesPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [viewMode, setViewMode] = useState<"grid" | "category">("grid");
 	const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
+	const [passwordConfirm, setPasswordConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
 	
 	useEffect(() => {
 		ensureSeed();
@@ -52,7 +55,12 @@ export default function CasesPage() {
 	}, {} as Record<string, CaseRecord[]>);
 
 	function openDeleteConfirm(id: string, name: string) {
-		setDeleteConfirm({ open: true, id, name });
+		// Use password confirmation for Chief and Admin, regular confirmation for others
+		if (user?.role === 'Chief' || user?.role === 'Admin') {
+			setPasswordConfirm({ open: true, id, name });
+		} else {
+			setDeleteConfirm({ open: true, id, name });
+		}
 	}
 
 	async function confirmDelete() {
@@ -89,6 +97,42 @@ export default function CasesPage() {
 		} finally {
 			setDeletingId(null);
 			setDeleteConfirm({ open: false, id: "", name: "" });
+		}
+	}
+
+	async function confirmPasswordDelete() {
+		if (deletingId) return;
+		
+		setDeletingId(passwordConfirm.id);
+		try {
+			// Find the case being deleted for logging
+			const deletedCase = cases.find(c => c.id === passwordConfirm.id);
+			
+			const next = cases.filter((c) => c.id !== passwordConfirm.id);
+			setCases(next);
+			writeStore("cases", next);
+			
+			// Log the activity in real-time
+			if (deletedCase) {
+				logActivity(
+					"case_delete",
+					`[SECURE] Deleted case ${deletedCase.id} - ${deletedCase.crimeType} incident`,
+					{
+						caseId: deletedCase.id,
+						crimeType: deletedCase.crimeType,
+						officer: deletedCase.officer,
+						status: deletedCase.status,
+						suspect: deletedCase.suspect || "Unknown",
+						deletedBy: user?.name || "Unknown",
+						securityLevel: "PASSWORD_VERIFIED"
+					}
+				);
+			}
+		} catch (error) {
+			// Handle error if needed
+		} finally {
+			setDeletingId(null);
+			setPasswordConfirm({ open: false, id: "", name: "" });
 		}
 	}
 
@@ -243,6 +287,10 @@ export default function CasesPage() {
 	return (
 		<>
 			<div className="space-y-6">
+				{/* Header with Back Button */}
+				<div className="flex items-center justify-between mb-4">
+					<BackButton href="/" label="Back to Dashboard" />
+				</div>
 				{/* Role-based access indicator */}
 				<div className="bg-card border border-border rounded-xl p-4">
 					<div className="flex items-center justify-between">
@@ -410,6 +458,15 @@ export default function CasesPage() {
 				confirmText="Delete"
 				variant="destructive"
 				onConfirm={confirmDelete}
+			/>
+
+			<PasswordConfirmationDialog
+				open={passwordConfirm.open}
+				onOpenChange={(open) => setPasswordConfirm({ ...passwordConfirm, open })}
+				title="Delete Case - Security Verification"
+				description={`You are about to permanently delete the case for "${passwordConfirm.name}". This high-security action requires password verification. The case data will be irreversibly removed from the system.`}
+				onConfirm={confirmPasswordDelete}
+				adminName={user?.name || "Unknown User"}
 			/>
 		</>
 	);

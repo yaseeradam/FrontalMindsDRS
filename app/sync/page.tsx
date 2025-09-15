@@ -7,8 +7,9 @@ import { motion } from "framer-motion";
 import { markAllSynced } from "@/lib/sync";
 import { readStore, type CaseRecord, type ArrestRecord, type PatrolRecord } from "@/lib/storage";
 import { toast } from "sonner";
+import { withAuth } from "@/app/providers/AuthProvider";
 
-export default function SyncPage() {
+function SyncPage() {
 	const [progress, setProgress] = useState(0);
 	const [running, setRunning] = useState(false);
 
@@ -55,3 +56,6 @@ export default function SyncPage() {
 		</div>
 	);
 }
+
+// Export the protected component - only Chief and Admin can access sync
+export default withAuth(SyncPage, ['Chief', 'Admin']);

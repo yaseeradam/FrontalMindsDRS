@@ -2,6 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { BackButton } from "@/components/ui/back-button";
 import { FileDown, RefreshCcw, BarChart3, PieChart as PieChartIcon, TrendingUp, Shield } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { readStore, type CaseRecord, type ArrestRecord, type PatrolRecord } from "@/lib/storage";
@@ -446,6 +447,9 @@ doc.text(String(rc.id || "-"), 60, y + 12);
 
 	return (
 		<div className="space-y-8">
+			<div className="mb-4">
+				<BackButton href="/dashboard" />
+			</div>
 			<div className="bg-card border border-border rounded-xl p-6">
 				<div className="flex items-center justify-between">
 					<div>

@@ -11,6 +11,7 @@ import { ArrestRecord, generateId, readStore, toBase64, writeStore } from "@/lib
 import { toast } from "sonner";
 import { Shield, AlertTriangle, Clock, User, FileText, MapPin, Camera, Upload, Lock } from "lucide-react";
 import { ClientYear } from "@/components/ui/client-year";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function ArrestNewPage() {
     const [suspectName, setSuspectName] = useState("");
@@ -79,6 +80,10 @@ export default function ArrestNewPage() {
 
     return (
         <div className="space-y-6">
+            {/* Header with Back Button */}
+            <div className="flex items-center justify-between mb-4">
+                <BackButton href="/arrests" label="Back to Arrests" />
+            </div>
             <div className="bg-card border border-border rounded-xl p-6">
                 <div className="flex items-center justify-between">
                     <div>

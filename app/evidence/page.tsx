@@ -7,11 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PasswordConfirmationDialog } from "@/components/ui/password-confirmation-dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { EvidenceRecord, readStore, writeStore, type CaseRecord, type ArrestRecord } from "@/lib/storage";
 import { ensureSeed } from "@/lib/seed";
-import { FileText, Image as ImageIcon, Video, Archive, Shield, Search, Filter, Eye, Printer, Plus, Download, Calendar } from "lucide-react";
+import { FileText, Image as ImageIcon, Video, Archive, Shield, Search, Filter, Eye, Printer, Plus, Download, Calendar, Lock } from "lucide-react";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { useRoleProtection } from "@/hooks/useRoleProtection";
 
 export default function EvidencePage() {
+	const { user, hasAccess } = useRoleProtection(); // Require authentication
+	const { canDelete } = useAuth();
 	const [ownerType, setOwnerType] = useState<string>("All");
 	const [q, setQ] = useState("");
 	const [evidence, setEvidence] = useState<EvidenceRecord[]>([]);
@@ -19,6 +25,8 @@ export default function EvidencePage() {
 	const [arrests, setArrests] = useState<ArrestRecord[]>([]);
 	const [selectedEvidence, setSelectedEvidence] = useState<EvidenceRecord | null>(null);
 	const [showDetails, setShowDetails] = useState(false);
+	const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
+	const [passwordConfirm, setPasswordConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
 
 	useEffect(() => {
 		ensureSeed();
@@ -35,10 +43,27 @@ export default function EvidencePage() {
 		});
 	}, [evidence, ownerType, q]);
 
-	function remove(id: string) {
-		const next = evidence.filter((e) => e.id !== id);
+	function openDeleteConfirm(id: string, name: string) {
+		// Use password confirmation for Chief and Admin, regular confirmation for others
+		if (user?.role === 'Chief' || user?.role === 'Admin') {
+			setPasswordConfirm({ open: true, id, name });
+		} else {
+			setDeleteConfirm({ open: true, id, name });
+		}
+	}
+
+	function confirmDelete() {
+		const next = evidence.filter((e) => e.id !== deleteConfirm.id);
 		setEvidence(next);
 		writeStore("evidence", next);
+		setDeleteConfirm({ open: false, id: "", name: "" });
+	}
+
+	function confirmPasswordDelete() {
+		const next = evidence.filter((e) => e.id !== passwordConfirm.id);
+		setEvidence(next);
+		writeStore("evidence", next);
+		setPasswordConfirm({ open: false, id: "", name: "" });
 	}
 
 	// View evidence details
@@ -68,33 +93,42 @@ export default function EvidencePage() {
 			<head>
 				<title>Evidence Report - ${evidenceItem.id}</title>
 				<style>
-					body { font-family: 'Arial', sans-serif; margin: 20px; line-height: 1.4; color: #333; }
-					.letterhead { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 30px 40px; margin: -20px -20px 30px -20px; position: relative; }
-					.letterhead::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #a855f7, #3b82f6); }
-					.agency-logo { width: 60px; height: 60px; background: #a855f7; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; float: left; margin-right: 20px; }
+					* { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; }
+					body { font-family: 'Arial', sans-serif; margin: 20px; line-height: 1.4; color: #333 !important; -webkit-print-color-adjust: exact !important; }
+					.letterhead { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; color: white !important; padding: 30px 40px; margin: -20px -20px 30px -20px; position: relative; -webkit-print-color-adjust: exact !important; }
+					.letterhead::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #a855f7, #3b82f6) !important; -webkit-print-color-adjust: exact !important; }
+					.agency-logo { width: 60px; height: 60px; background: #a855f7 !important; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; float: left; margin-right: 20px; color: white !important; -webkit-print-color-adjust: exact !important; }
 					.agency-details { overflow: hidden; }
-					.agency-name { font-size: 28px; font-weight: bold; margin: 0 0 5px 0; color: #a855f7; }
-					.agency-subtitle { font-size: 16px; margin: 0 0 8px 0; color: #cbd5e1; }
-					.report-type { font-size: 14px; font-weight: bold; color: #fbbf24; margin: 0; }
-					.report-meta { position: absolute; top: 30px; right: 40px; text-align: right; font-size: 11px; color: #94a3b8; }
+					.agency-name { font-size: 28px; font-weight: bold; margin: 0 0 5px 0; color: #a855f7 !important; }
+					.agency-subtitle { font-size: 16px; margin: 0 0 8px 0; color: #cbd5e1 !important; }
+					.report-type { font-size: 14px; font-weight: bold; color: #fbbf24 !important; margin: 0; }
+					.report-meta { position: absolute; top: 30px; right: 40px; text-align: right; font-size: 11px; color: #94a3b8 !important; }
 					.evidence-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-					.info-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
-					.info-label { font-weight: bold; color: #475569; font-size: 11px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
-					.info-value { color: #1e293b; font-size: 14px; font-weight: 500; }
-					.preview-section { margin: 30px 0; padding: 20px; border: 2px solid #a855f7; border-radius: 8px; text-align: center; background: #faf5ff; }
+					.info-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc !important; -webkit-print-color-adjust: exact !important; }
+					.info-label { font-weight: bold; color: #475569 !important; font-size: 11px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+					.info-value { color: #1e293b !important; font-size: 14px; font-weight: 500; }
+					.preview-section { margin: 30px 0; padding: 20px; border: 2px solid #a855f7; border-radius: 8px; text-align: center; background: #faf5ff !important; -webkit-print-color-adjust: exact !important; }
 					.evidence-preview { max-width: 400px; max-height: 500px; border: 2px solid #a855f7; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-					.chain-of-custody { margin: 30px 0; padding: 20px; border: 1px solid #d1d5db; border-radius: 8px; background: #f9fafb; }
+					.chain-of-custody { margin: 30px 0; padding: 20px; border: 1px solid #d1d5db; border-radius: 8px; background: #f9fafb !important; -webkit-print-color-adjust: exact !important; }
 					.custody-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
 					.custody-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dotted #d1d5db; }
-					.custody-label { font-weight: bold; color: #4b5563; }
-					.custody-value { color: #1f2937; }
+					.custody-label { font-weight: bold; color: #4b5563 !important; }
+					.custody-value { color: #1f2937 !important; }
 					.footer-section { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; }
-					.officer-details { background: #f1f5f9; padding: 15px 20px; border-radius: 8px; border-left: 4px solid #3b82f6; }
-					.classification-stamp { position: absolute; top: 10px; right: 10px; background: #dc2626; color: white; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; transform: rotate(15deg); }
+					.officer-details { background: #f1f5f9 !important; padding: 15px 20px; border-radius: 8px; border-left: 4px solid #3b82f6; -webkit-print-color-adjust: exact !important; }
+					.classification-stamp { position: absolute; top: 10px; right: 10px; background: #dc2626 !important; color: white !important; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; transform: rotate(15deg); -webkit-print-color-adjust: exact !important; }
 					@media print { 
-						body { margin: 0; } 
+						* { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; }
+						body { margin: 0; -webkit-print-color-adjust: exact !important; } 
 						@page { margin: 1.5cm; size: A4; }
-						.letterhead { margin: -20px -20px 20px -20px; }
+						.letterhead { margin: -20px -20px 20px -20px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; -webkit-print-color-adjust: exact !important; }
+						.letterhead::after { background: linear-gradient(90deg, #a855f7, #3b82f6) !important; -webkit-print-color-adjust: exact !important; }
+						.agency-logo { background: #a855f7 !important; color: white !important; -webkit-print-color-adjust: exact !important; }
+						.info-item { background: #f8fafc !important; -webkit-print-color-adjust: exact !important; }
+						.preview-section { background: #faf5ff !important; -webkit-print-color-adjust: exact !important; }
+						.chain-of-custody { background: #f9fafb !important; -webkit-print-color-adjust: exact !important; }
+						.officer-details { background: #f1f5f9 !important; -webkit-print-color-adjust: exact !important; }
+						.classification-stamp { background: #dc2626 !important; color: white !important; -webkit-print-color-adjust: exact !important; }
 					}
 				</style>
 			</head>
@@ -239,8 +273,45 @@ export default function EvidencePage() {
 		return "bg-gray-500/20 text-gray-400 border-gray-500/30";
 	}
 
+	// Show loading screen while checking authentication
+	if (!hasAccess) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-background">
+				<div className="flex items-center gap-3 text-muted-foreground">
+					<div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+					<span className="font-mono text-sm">LOADING EVIDENCE VAULT...</span>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-6">
+			{/* Role-based access indicator */}
+			<div className="bg-card border border-border rounded-xl p-4">
+				<div className="flex items-center justify-between">
+					<div className="flex items-center gap-3">
+						<Shield className="h-5 w-5 text-primary" />
+						<div>
+							<div className="text-sm font-mono font-semibold">
+								ACCESS LEVEL: {user?.role?.toUpperCase() || 'UNKNOWN'}
+							</div>
+							<div className="text-xs text-muted-foreground font-mono">
+								{canDelete() 
+									? 'Full permissions - View, Download, Delete' 
+									: 'Limited permissions - View and Download only'
+								}
+							</div>
+						</div>
+					</div>
+					{!canDelete() && (
+						<div className="flex items-center gap-2 text-xs font-mono text-amber-600 dark:text-amber-400">
+							<Lock className="h-3 w-3" />
+							RESTRICTED: Contact Chief or Admin to delete evidence
+						</div>
+					)}
+				</div>
+			</div>
 			<div className="bg-card border border-border rounded-xl p-6">
 				<div className="flex items-center justify-between">
 					<div>
@@ -427,14 +498,16 @@ export default function EvidencePage() {
 										>
 											<Download className="h-3 w-3" />
 										</Button>
-										<Button 
-											size="sm" 
-											variant="destructive" 
-											onClick={() => remove(ev.id)} 
-											className="px-2 font-mono text-xs"
-										>
-											DEL
-										</Button>
+										{canDelete() && (
+											<Button 
+												size="sm" 
+												variant="destructive" 
+												onClick={() => openDeleteConfirm(ev.id, ev.filename)} 
+												className="px-2 font-mono text-xs"
+											>
+												DEL
+											</Button>
+										)}
 									</div>
 								</div>
 							</div>

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Printer } from "lucide-react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import Link from "next/link";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function CaseDetailPage() {
 	const params = useParams<{id: string}>();
@@ -207,6 +208,9 @@ export default function CaseDetailPage() {
 
 	return (
 		<div className="space-y-6">
+			<div className="flex items-center justify-start mb-4">
+				<BackButton href="/cases" label="Back to Cases" />
+			</div>
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-semibold tracking-wider text-sky-300">{record.id}</h1>
 				<div className="flex gap-2">

@@ -122,29 +122,32 @@ export default function DashboardPage() {
 						SYSTEM ONLINE
 					</div>
 				</div>
-				<div className="grid md:grid-cols-5 gap-3">
-					<LoadingButton className="h-12 flex-col gap-1 bg-primary hover:bg-primary/90" asChild>
+				<div className={`grid gap-3 ${user?.role === 'Officer' ? 'md:grid-cols-4' : 'md:grid-cols-5'}`}>
+					<Button className="h-12 flex-col gap-1 bg-primary hover:bg-primary/90" asChild>
 						<Link href="/cases/new">
 							<Plus className="h-4 w-4" />
 							<span className="text-xs font-mono">NEW CASE</span>
 						</Link>
-					</LoadingButton>
-					<LoadingButton variant="outline" className="h-12 flex-col gap-1 border-red-500/30 hover:bg-red-500/10" asChild>
+					</Button>
+					<Button variant="outline" className="h-12 flex-col gap-1 border-red-500/30 hover:bg-red-500/10" asChild>
 						<Link href="/arrests/new">
 							<Plus className="h-4 w-4" />
 							<span className="text-xs font-mono">ARREST</span>
 						</Link>
-					</LoadingButton>
-					<LoadingButton variant="outline" className="h-12 flex-col gap-1 border-green-500/30 hover:bg-green-500/10" asChild>
+					</Button>
+					<Button variant="outline" className="h-12 flex-col gap-1 border-green-500/30 hover:bg-green-500/10" asChild>
 						<Link href="/patrols/new">
 							<Plus className="h-4 w-4" />
 							<span className="text-xs font-mono">PATROL LOG</span>
 						</Link>
-					</LoadingButton>
-					<LoadingButton variant="outline" className="h-12 flex-col gap-1" loadingText="SYNCING...">
-						<RefreshCcw className="h-4 w-4" />
-						<span className="text-xs font-mono">SYNC HQ</span>
-					</LoadingButton>
+					</Button>
+					{/* Hide SYNC HQ for Officers */}
+					{user?.role !== 'Officer' && (
+						<LoadingButton variant="outline" className="h-12 flex-col gap-1" loadingText="SYNCING...">
+							<RefreshCcw className="h-4 w-4" />
+							<span className="text-xs font-mono">SYNC HQ</span>
+						</LoadingButton>
+					)}
 					<LoadingButton variant="outline" className="h-12 flex-col gap-1" loadingText="EXPORTING...">
 						<FileDown className="h-4 w-4" />
 						<span className="text-xs font-mono">EXPORT</span>
