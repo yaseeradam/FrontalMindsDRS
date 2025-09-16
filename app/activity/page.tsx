@@ -26,6 +26,7 @@ import {
 	RefreshCw
 } from "lucide-react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function ActivityPage() {
 	const [logs, setLogs] = useState<ActivityLog[]>([]);
@@ -131,11 +132,14 @@ export default function ActivityPage() {
 			{/* Header */}
 			<div className="bg-card border border-border rounded-xl p-6">
 				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-2xl font-bold tracking-wider text-primary font-mono">SYSTEM ACTIVITY LOG</h1>
-						<p className="text-sm text-muted-foreground font-mono mt-1">
-							USER ACTIONS & SYSTEM EVENTS MONITORING
-						</p>
+					<div className="flex items-center gap-4">
+						<BackButton href="/" />
+						<div>
+							<h1 className="text-2xl font-bold tracking-wider text-primary font-mono">SYSTEM ACTIVITY LOG</h1>
+							<p className="text-sm text-muted-foreground font-mono mt-1">
+								USER ACTIONS & SYSTEM EVENTS MONITORING
+							</p>
+						</div>
 					</div>
 					<div className="flex items-center gap-4">
 						<div className="flex items-center gap-4">
